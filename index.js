@@ -11,6 +11,8 @@ sizes,
 scene,
 camera,
 renderer,
+raycaster,
+distance,
 controls,
 centerTile,
 simplex,
@@ -35,6 +37,16 @@ sandHeight,
 shallowWaterHeight,
 waterHeight,
 deepWaterHeight,
+snowMesh,
+lightSnowMesh,
+rockMesh,
+forestMesh,
+lightForestMesh,
+grassMesh,
+sandMesh,
+shallowWaterMesh,
+waterMesh,
+deepWaterMesh,
 textures;
 
 const setScene = async () => {
@@ -44,10 +56,10 @@ const setScene = async () => {
     height: container.offsetHeight
   };
 
-  scene = new THREE.Scene();
+  scene   = new THREE.Scene();
 
-  camera             = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 1, 1000);
-  camera.position.set(0, 50, 60);
+  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 1000);
+  camera.position.set(0, 7, 0);
   
   renderer = new THREE.WebGLRenderer({
     canvas:     canvas,
@@ -65,6 +77,9 @@ const setScene = async () => {
   pointLight.position.set(10, 50, 70);
   pointLight.castShadow = true;
   scene.add(pointLight);
+
+  raycaster = new THREE.Raycaster();
+  distance  = 6;
 
   centerTile = {
     xFrom:  -10,
@@ -107,7 +122,7 @@ const setScene = async () => {
     deepWater:    0x015373
   };
 
-  setControls();
+  // setControls();
   createTile();
   resize();
   listenTo();
@@ -176,16 +191,16 @@ const createTile = () => {
 
     } 
 
-  const snowMesh          = setHexMesh(snowhexagons, textures.snow);
-  const lightSnowMesh     = setHexMesh(lightSnowhexagons, textures.lightSnow);
-  const rockMesh          = setHexMesh(rockhexagons, textures.rock);
-  const forestMesh        = setHexMesh(foresthexagons, textures.forest);
-  const lightForestMesh   = setHexMesh(lightForesthexagons, textures.lightForest);
-  const grassMesh         = setHexMesh(grasshexagons, textures.grass);
-  const sandMesh          = setHexMesh(sandhexagons, textures.sand);
-  const shallowWaterMesh  = setHexMesh(shallowWaterhexagons, textures.shallowWater);
-  const waterMesh         = setHexMesh(waterhexagons, textures.water);
-  const deepWaterMesh     = setHexMesh(deepWaterhexagons, textures.deepWater);
+  snowMesh          = setHexMesh(snowhexagons, textures.snow);
+  lightSnowMesh     = setHexMesh(lightSnowhexagons, textures.lightSnow);
+  rockMesh          = setHexMesh(rockhexagons, textures.rock);
+  forestMesh        = setHexMesh(foresthexagons, textures.forest);
+  lightForestMesh   = setHexMesh(lightForesthexagons, textures.lightForest);
+  grassMesh         = setHexMesh(grasshexagons, textures.grass);
+  sandMesh          = setHexMesh(sandhexagons, textures.sand);
+  shallowWaterMesh  = setHexMesh(shallowWaterhexagons, textures.shallowWater);
+  waterMesh         = setHexMesh(waterhexagons, textures.water);
+  deepWaterMesh     = setHexMesh(deepWaterhexagons, textures.deepWater);
   scene.add(snowMesh, lightSnowMesh, rockMesh, forestMesh, lightForestMesh, 
     grassMesh, sandMesh, shallowWaterMesh, waterMesh, deepWaterMesh);
 
@@ -207,24 +222,64 @@ const resize = () => {
 
 const keyDown = (event) => {
  
-  if (event.keyCode == '38') {
+  if (event.keyCode == '38') { // up arrow
     centerTile.yFrom -= 21;
     centerTile.yTo -= 21;
   }
-  else if (event.keyCode == '40') {
+  else if (event.keyCode == '40') { // down arrow
     centerTile.yFrom += 21;
     centerTile.yTo += 21;
   }
-  else if (event.keyCode == '37') {
+  else if (event.keyCode == '37') { // left arrow
     centerTile.xFrom -= 21;
     centerTile.xTo -= 21;
   }
-  else if (event.keyCode == '39') {
+  else if (event.keyCode == '39') { // right arrow
     centerTile.xFrom += 21;
     centerTile.xTo += 21;
   }
 
+  if (event.keyCode == '87') { // w
+    camera.position.z -= 2;
+    calcCamHeight();
+  }
+  else if (event.keyCode == '83') { // s
+    camera.position.z += 2;
+    calcCamHeight();
+  }
+  else if (event.keyCode == '65') { // a
+    camera.position.x -= 2;
+    calcCamHeight();
+  }
+  else if (event.keyCode == '68') { // d
+    camera.position.x += 2;
+    calcCamHeight();
+  }
+
   createTile();
+  
+}
+
+const calcCamHeight = () => {
+
+  // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
+  raycaster.set(camera.position, new THREE.Vector3(0, -1, -1));
+
+  var intersects = raycaster.intersectObjects([
+    snowMesh,
+    lightSnowMesh,
+    rockMesh,
+    forestMesh,
+    lightForestMesh,
+    grassMesh,
+    sandMesh,
+    shallowWaterMesh,
+    waterMesh,
+    deepWaterMesh
+  ]);
+
+  if (distance > intersects[0].distance) camera.position.y += (distance - intersects[0].distance) - 1;
+  else camera.position.y -= intersects[0].distance - distance;
   
 }
 
@@ -235,7 +290,7 @@ const listenTo = () => {
 
 const render = () => {
 
-  controls.update();
+  // controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(render.bind(this))
 
