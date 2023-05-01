@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
+import * as stats from 'https://cdn.skypack.dev/three-stats'
 
 const container = document.querySelector('.container');
 const canvas    = document.querySelector('.canvas');
@@ -47,7 +48,8 @@ sandMesh,
 shallowWaterMesh,
 waterMesh,
 deepWaterMesh,
-textures;
+textures,
+statsPanel;
 
 const setScene = async () => {
 
@@ -87,8 +89,8 @@ const setScene = async () => {
     yFrom:  -10,
     yTo:    10
   }
-  simplex       = new SimplexNoise();
-  maxHeight     = 10;
+  simplex               = new SimplexNoise();
+  maxHeight             = 10;
   snowhexagons          = new THREE.BoxGeometry(0, 0, 0);
   lightSnowhexagons     = new THREE.BoxGeometry(0, 0, 0);
   rockhexagons          = new THREE.BoxGeometry(0, 0, 0);
@@ -109,23 +111,36 @@ const setScene = async () => {
   shallowWaterHeight    = maxHeight * 0.2;
   waterHeight           = maxHeight * 0.1;
   deepWaterHeight       = maxHeight * 0;
+  // textures              = {
+  //   snow:         0xE5E5E5,
+  //   lightSnow:    0x73918F,
+  //   rock:         0x2A2D10,
+  //   forest:       0x224005,
+  //   lightForest:  0x367308,
+  //   grass:        0x98BF06,
+  //   sand:         0xE3F272,
+  //   shallowWater: 0x3EA9BF,
+  //   water:        0x00738B,
+  //   deepWater:    0x015373
+  // };
   textures              = {
-    snow:         0xE5E5E5,
-    lightSnow:    0x73918F,
-    rock:         0x2A2D10,
-    forest:       0x224005,
-    lightForest:  0x367308,
-    grass:        0x98BF06,
-    sand:         0xE3F272,
-    shallowWater: 0x3EA9BF,
-    water:        0x00738B,
-    deepWater:    0x015373
+    snow:         new THREE.Color(0xE5E5E5),
+    lightSnow:    new THREE.Color(0x73918F),
+    rock:         new THREE.Color(0x2A2D10),
+    forest:       new THREE.Color(0x224005),
+    lightForest:  new THREE.Color(0x367308),
+    grass:        new THREE.Color(0x98BF06),
+    sand:         new THREE.Color(0xE3F272),
+    shallowWater: new THREE.Color(0x3EA9BF),
+    water:        new THREE.Color(0x00738B),
+    deepWater:    new THREE.Color(0x015373)
   };
 
-  // setControls();
+  setControls();
   createTile();
   resize();
   listenTo();
+  showStats();
   render();
 
 }
@@ -137,40 +152,14 @@ const setControls = () => {
 
 const createTile = () => {
 
-  const tileToPosition = (tileX, tileY) => {
-    return new THREE.Vector2((tileX + (tileY % 2) * 0.5) * 1.77, tileY * 1.535);
+  const tileToPosition = (tileX, height, tileY) => {
+    return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.77, height / 2, tileY * 1.535);
   }
 
-  const geometry = (height, position) => {
+  const setHexMesh = (geo) => {
 
-    const hex  = new THREE.CylinderGeometry(1, 1, height, 6, 1, false);
-    hex.translate(position.x, height * 0.5, position.y);
-  
-    return hex;
-
-  }
-
-  const setHex = (height, position) => {
-
-    const hex = geometry(height, position);
-
-    if(height > snowHeight)               snowhexagons = mergeGeometries([hex, snowhexagons]);
-    else if(height > lightSnowHeight)     lightSnowhexagons = mergeGeometries([hex, lightSnowhexagons]);
-    else if(height > rockHeight)          rockhexagons = mergeGeometries([hex, rockhexagons]);
-    else if(height > forestHeight)        foresthexagons = mergeGeometries([hex, foresthexagons]);
-    else if(height > lightForestHeight)   lightForesthexagons = mergeGeometries([hex, lightForesthexagons]);
-    else if(height > grassHeight)         grasshexagons = mergeGeometries([hex, grasshexagons]);
-    else if(height > sandHeight)          sandhexagons = mergeGeometries([hex, sandhexagons]);
-    else if(height > shallowWaterHeight)  shallowWaterhexagons = mergeGeometries([hex, shallowWaterhexagons]);
-    else if(height > waterHeight)         waterhexagons = mergeGeometries([hex, waterhexagons]);
-    else if(height > deepWaterHeight)     deepWaterhexagons = mergeGeometries([hex, deepWaterhexagons]);
-
-  }
-
-  const setHexMesh = (geo, color) => {
-
-    const mat   = new THREE.MeshStandardMaterial({color: color});
-    const mesh  = new THREE.Mesh(geo, mat);
+    const mat   = new THREE.MeshStandardMaterial();
+    const mesh  = new THREE.InstancedMesh(geo, mat, 441);
 
     mesh.castShadow     = true;
     mesh.receiveShadow  = true;
@@ -179,30 +168,42 @@ const createTile = () => {
 
   }
 
-  for(let i = centerTile.xFrom; i <= centerTile.xTo; i++)
+  const manipulator = new THREE.Object3D();
+  const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
+  const mesh        = setHexMesh(geo);
+  
+  let counter = 0;
+  for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
-      const position = tileToPosition(i, j);
-      
-      let noise = (simplex.noise2D(i * 0.04, j * 0.04) + 1) * 0.5;
-      noise = Math.pow(noise, 1.5);
+      let noise     = (simplex.noise2D(i * 0.04, j * 0.04) + 1) * 0.5;
+      noise         = Math.pow(noise, 1.5);
+      const height  = noise * maxHeight;
 
-      setHex(noise * maxHeight, position);
+      manipulator.scale.y = height;
 
-    } 
+      const pos = tileToPosition(i, height, j);
+      manipulator.position.set(pos.x, pos.y, pos.z);
 
-  snowMesh          = setHexMesh(snowhexagons, textures.snow);
-  lightSnowMesh     = setHexMesh(lightSnowhexagons, textures.lightSnow);
-  rockMesh          = setHexMesh(rockhexagons, textures.rock);
-  forestMesh        = setHexMesh(foresthexagons, textures.forest);
-  lightForestMesh   = setHexMesh(lightForesthexagons, textures.lightForest);
-  grassMesh         = setHexMesh(grasshexagons, textures.grass);
-  sandMesh          = setHexMesh(sandhexagons, textures.sand);
-  shallowWaterMesh  = setHexMesh(shallowWaterhexagons, textures.shallowWater);
-  waterMesh         = setHexMesh(waterhexagons, textures.water);
-  deepWaterMesh     = setHexMesh(deepWaterhexagons, textures.deepWater);
-  scene.add(snowMesh, lightSnowMesh, rockMesh, forestMesh, lightForestMesh, 
-    grassMesh, sandMesh, shallowWaterMesh, waterMesh, deepWaterMesh);
+      manipulator.updateMatrix();
+      mesh.setMatrixAt(counter, manipulator.matrix);
+
+      if(height > snowHeight)               mesh.setColorAt(counter, textures.snow);
+      else if(height > lightSnowHeight)     mesh.setColorAt(counter, textures.lightSnow);
+      else if(height > rockHeight)          mesh.setColorAt(counter, textures.rock);
+      else if(height > forestHeight)        mesh.setColorAt(counter, textures.forest);
+      else if(height > lightForestHeight)   mesh.setColorAt(counter, textures.lightForest);
+      else if(height > grassHeight)         mesh.setColorAt(counter, textures.grass);
+      else if(height > sandHeight)          mesh.setColorAt(counter, textures.sand);
+      else if(height > shallowWaterHeight)  mesh.setColorAt(counter, textures.shallowWater);
+      else if(height > waterHeight)         mesh.setColorAt(counter, textures.water);
+      else if(height > deepWaterHeight)     mesh.setColorAt(counter, textures.deepWater);
+
+      counter++;
+
+    }
+  } 
+  scene.add(mesh);
 
 }
 
@@ -288,10 +289,19 @@ const listenTo = () => {
   window.addEventListener('keydown', keyDown.bind(this));
 }
 
+const showStats = () => {
+  statsPanel = new stats.Stats();
+  statsPanel.showPanel(0);
+  document.body.appendChild(statsPanel.dom);
+}
+
 const render = () => {
 
-  // controls.update();
+  statsPanel.begin();
+  controls.update();
   renderer.render(scene, camera);
+  statsPanel.end();
+
   requestAnimationFrame(render.bind(this))
 
 }
