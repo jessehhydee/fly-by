@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
 import * as stats from 'https://cdn.skypack.dev/three-stats'
 
@@ -18,16 +17,6 @@ controls,
 centerTile,
 simplex,
 maxHeight,
-snowhexagons,
-lightSnowhexagons,
-rockhexagons,
-foresthexagons,
-lightForesthexagons,
-grasshexagons,
-sandhexagons,
-shallowWaterhexagons,
-waterhexagons,
-deepWaterhexagons,
 snowHeight,
 lightSnowHeight,
 rockHeight,
@@ -38,17 +27,8 @@ sandHeight,
 shallowWaterHeight,
 waterHeight,
 deepWaterHeight,
-snowMesh,
-lightSnowMesh,
-rockMesh,
-forestMesh,
-lightForestMesh,
-grassMesh,
-sandMesh,
-shallowWaterMesh,
-waterMesh,
-deepWaterMesh,
 textures,
+terrainTiles,
 statsPanel;
 
 const setScene = async () => {
@@ -91,16 +71,6 @@ const setScene = async () => {
   }
   simplex               = new SimplexNoise();
   maxHeight             = 10;
-  snowhexagons          = new THREE.BoxGeometry(0, 0, 0);
-  lightSnowhexagons     = new THREE.BoxGeometry(0, 0, 0);
-  rockhexagons          = new THREE.BoxGeometry(0, 0, 0);
-  foresthexagons        = new THREE.BoxGeometry(0, 0, 0);
-  lightForesthexagons   = new THREE.BoxGeometry(0, 0, 0);
-  grasshexagons         = new THREE.BoxGeometry(0, 0, 0);
-  sandhexagons          = new THREE.BoxGeometry(0, 0, 0);
-  shallowWaterhexagons  = new THREE.BoxGeometry(0, 0, 0);
-  waterhexagons         = new THREE.BoxGeometry(0, 0, 0);
-  deepWaterhexagons     = new THREE.BoxGeometry(0, 0, 0);
   snowHeight            = maxHeight * 0.9;
   lightSnowHeight       = maxHeight * 0.8;
   rockHeight            = maxHeight * 0.7;
@@ -111,18 +81,6 @@ const setScene = async () => {
   shallowWaterHeight    = maxHeight * 0.2;
   waterHeight           = maxHeight * 0.1;
   deepWaterHeight       = maxHeight * 0;
-  // textures              = {
-  //   snow:         0xE5E5E5,
-  //   lightSnow:    0x73918F,
-  //   rock:         0x2A2D10,
-  //   forest:       0x224005,
-  //   lightForest:  0x367308,
-  //   grass:        0x98BF06,
-  //   sand:         0xE3F272,
-  //   shallowWater: 0x3EA9BF,
-  //   water:        0x00738B,
-  //   deepWater:    0x015373
-  // };
   textures              = {
     snow:         new THREE.Color(0xE5E5E5),
     lightSnow:    new THREE.Color(0x73918F),
@@ -135,8 +93,9 @@ const setScene = async () => {
     water:        new THREE.Color(0x00738B),
     deepWater:    new THREE.Color(0x015373)
   };
+  terrainTiles = [];
 
-  setControls();
+  // setControls();
   createTile();
   resize();
   listenTo();
@@ -171,6 +130,7 @@ const createTile = () => {
   const manipulator = new THREE.Object3D();
   const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
   const mesh        = setHexMesh(geo);
+  terrainTiles.push(mesh);
   
   let counter = 0;
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
@@ -202,7 +162,8 @@ const createTile = () => {
       counter++;
 
     }
-  } 
+  }
+
   scene.add(mesh);
 
 }
@@ -266,18 +227,7 @@ const calcCamHeight = () => {
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
   raycaster.set(camera.position, new THREE.Vector3(0, -1, -1));
 
-  var intersects = raycaster.intersectObjects([
-    snowMesh,
-    lightSnowMesh,
-    rockMesh,
-    forestMesh,
-    lightForestMesh,
-    grassMesh,
-    sandMesh,
-    shallowWaterMesh,
-    waterMesh,
-    deepWaterMesh
-  ]);
+  var intersects = raycaster.intersectObjects(terrainTiles);
 
   if (distance > intersects[0].distance) camera.position.y += (distance - intersects[0].distance) - 1;
   else camera.position.y -= intersects[0].distance - distance;
@@ -298,7 +248,7 @@ const showStats = () => {
 const render = () => {
 
   statsPanel.begin();
-  controls.update();
+  // controls.update();
   renderer.render(scene, camera);
   statsPanel.end();
 
