@@ -224,27 +224,31 @@ const keyDown = (event) => {
   if (event.keyCode == '38') { // up arrow
     centerTile.yFrom -= 21;
     centerTile.yTo -= 21;
+    createTile();
   }
   else if (event.keyCode == '40') { // down arrow
     centerTile.yFrom += 21;
     centerTile.yTo += 21;
+    createTile();
   }
   else if (event.keyCode == '37') { // left arrow
     centerTile.xFrom -= 21;
     centerTile.xTo -= 21;
+    createTile();
   }
   else if (event.keyCode == '39') { // right arrow
     centerTile.xFrom += 21;
     centerTile.xTo += 21;
+    createTile();
   }
 
   if (event.keyCode == '87') { // w
     capsule.position.z -= 2;
-    calcCamHeight();
+    calcCamHeight(true);
   }
   else if (event.keyCode == '83') { // s
     capsule.position.z += 2;
-    calcCamHeight();
+    calcCamHeight(false);
   }
   else if (event.keyCode == '65') { // a
     capsule.position.x -= 2;
@@ -254,15 +258,13 @@ const keyDown = (event) => {
     capsule.position.x += 2;
     calcCamHeight();
   }
-
-  createTile();
   
 }
 
-const calcCamHeight = () => {
+const calcCamHeight = (movingForward = true) => {
 
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
-  raycaster.set(capsule.position, new THREE.Vector3(0, -1, 0));
+  raycaster.set(capsule.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
 
   var intersects = raycaster.intersectObjects(terrainTiles);
 
