@@ -99,7 +99,7 @@ const setScene = async () => {
   };
   terrainTiles = [];
 
-  setControls();
+  // setControls();
   setRaycast();
   setThirdPersonCam();
   setSphere();
@@ -109,8 +109,6 @@ const setScene = async () => {
   showStats();
   render();
 
-  console.log(camera.position);
-
 }
 
 const setControls = () => {
@@ -119,6 +117,7 @@ const setControls = () => {
 }
 
 const setRaycast = () => {
+
   THREE.BufferGeometry.prototype.computeBoundsTree  = computeBoundsTree;
   THREE.BufferGeometry.prototype.disposeBoundsTree  = disposeBoundsTree;
   THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
@@ -126,43 +125,12 @@ const setRaycast = () => {
   raycaster = new THREE.Raycaster();
   distance  = 3;
   raycaster.firstHitOnly = true;
+
 }
 
 const setThirdPersonCam = () => {
-
   currentPos    = new THREE.Vector3();
   currentLookAt = new THREE.Vector3();
-
-}
-
-const calcIdealOffset = () => {
-
-  const idealOffset = new THREE.Vector3(3, 9, 16);
-  idealOffset.add(capsule.position)
-  return idealOffset;
-
-}
-
-const calcIdealLookat = () => {
-
-  const idealLookat = new THREE.Vector3(0, -5, -25);
-  idealLookat.add(capsule.position)
-  return idealLookat;
-
-}
-
-const thirdPersonCamUpdate = () => {
-
-  const idealOffset = calcIdealOffset();
-  const idealLookat = calcIdealLookat();
-
-  const t = 0.05;
-  currentPos.lerp(idealOffset, t);
-  currentLookAt.lerp(idealLookat, t);
-
-  camera.position.copy(currentPos);
-  camera.lookAt(currentLookAt);
-
 }
 
 const setSphere = () => {
@@ -314,10 +282,36 @@ const showStats = () => {
   document.body.appendChild(statsPanel.dom);
 }
 
+const thirdPersonCamUpdate = () => {
+
+  const calcIdealOffset = () => {
+    const idealOffset = new THREE.Vector3(3, 9, 16);
+    idealOffset.add(capsule.position)
+    return idealOffset;
+  }
+  
+  const calcIdealLookat = () => {
+    const idealLookat = new THREE.Vector3(0, -5, -25);
+    idealLookat.add(capsule.position)
+    return idealLookat;
+  }
+
+  const idealOffset = calcIdealOffset();
+  const idealLookat = calcIdealLookat();
+
+  const factor = 0.05;
+  currentPos.lerp(idealOffset, factor);
+  currentLookAt.lerp(idealLookat, factor);
+
+  camera.position.copy(currentPos);
+  camera.lookAt(currentLookAt);
+
+}
+
 const render = () => {
 
   statsPanel.begin();
-  controls.update();
+  // controls.update();
   thirdPersonCamUpdate();
   renderer.render(scene, camera);
   statsPanel.end();
