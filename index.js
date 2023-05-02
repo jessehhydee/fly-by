@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm'
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
 import * as stats from 'https://cdn.skypack.dev/three-stats'
 
@@ -11,9 +12,10 @@ sizes,
 scene,
 camera,
 renderer,
+controls,
 raycaster,
 distance,
-controls,
+capsule,
 centerTile,
 simplex,
 maxHeight,
@@ -31,6 +33,11 @@ textures,
 terrainTiles,
 statsPanel;
 
+let 
+currentPos,
+currentLookAt;
+
+
 const setScene = async () => {
 
   sizes = {
@@ -41,7 +48,7 @@ const setScene = async () => {
   scene   = new THREE.Scene();
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 1000);
-  camera.position.set(0, 7, 0);
+  camera.position.set(0, 40, 40);
   
   renderer = new THREE.WebGLRenderer({
     canvas:     canvas,
@@ -59,9 +66,6 @@ const setScene = async () => {
   pointLight.position.set(10, 50, 70);
   pointLight.castShadow = true;
   scene.add(pointLight);
-
-  raycaster = new THREE.Raycaster();
-  distance  = 6;
 
   centerTile = {
     xFrom:  -10,
@@ -95,12 +99,17 @@ const setScene = async () => {
   };
   terrainTiles = [];
 
-  // setControls();
+  setControls();
+  setRaycast();
+  setThirdPersonCam();
+  setSphere();
   createTile();
   resize();
   listenTo();
   showStats();
   render();
+
+  console.log(camera.position);
 
 }
 
@@ -109,10 +118,69 @@ const setControls = () => {
   controls.enableDamping   = true;
 }
 
+const setRaycast = () => {
+  THREE.BufferGeometry.prototype.computeBoundsTree  = computeBoundsTree;
+  THREE.BufferGeometry.prototype.disposeBoundsTree  = disposeBoundsTree;
+  THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
+
+  raycaster = new THREE.Raycaster();
+  distance  = 3;
+  raycaster.firstHitOnly = true;
+}
+
+const setThirdPersonCam = () => {
+
+  currentPos    = new THREE.Vector3();
+  currentLookAt = new THREE.Vector3();
+
+}
+
+const calcIdealOffset = () => {
+
+  const idealOffset = new THREE.Vector3(3, 9, 16);
+  idealOffset.add(capsule.position)
+  return idealOffset;
+
+}
+
+const calcIdealLookat = () => {
+
+  const idealLookat = new THREE.Vector3(0, -5, -25);
+  idealLookat.add(capsule.position)
+  return idealLookat;
+
+}
+
+const thirdPersonCamUpdate = () => {
+
+  const idealOffset = calcIdealOffset();
+  const idealLookat = calcIdealLookat();
+
+  const t = 0.05;
+  currentPos.lerp(idealOffset, t);
+  currentLookAt.lerp(idealLookat, t);
+
+  camera.position.copy(currentPos);
+  camera.lookAt(currentLookAt);
+
+}
+
+const setSphere = () => {
+
+  const geo     = new THREE.CapsuleGeometry(1, 1, 4, 14); 
+  const mat     = new THREE.MeshBasicMaterial({color: 0x000000}); 
+  capsule       = new THREE.Mesh(geo, mat); 
+
+  capsule.position.set(0, 10, 0);
+  geo.computeBoundsTree();
+  scene.add(capsule);
+
+}
+
 const createTile = () => {
 
   const tileToPosition = (tileX, height, tileY) => {
-    return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.77, height / 2, tileY * 1.535);
+    return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.68, height / 2, tileY * 1.535);
   }
 
   const setHexMesh = (geo) => {
@@ -130,6 +198,7 @@ const createTile = () => {
   const manipulator = new THREE.Object3D();
   const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
   const mesh        = setHexMesh(geo);
+  geo.computeBoundsTree();
   terrainTiles.push(mesh);
   
   let counter = 0;
@@ -202,19 +271,19 @@ const keyDown = (event) => {
   }
 
   if (event.keyCode == '87') { // w
-    camera.position.z -= 2;
+    capsule.position.z -= 2;
     calcCamHeight();
   }
   else if (event.keyCode == '83') { // s
-    camera.position.z += 2;
+    capsule.position.z += 2;
     calcCamHeight();
   }
   else if (event.keyCode == '65') { // a
-    camera.position.x -= 2;
+    capsule.position.x -= 2;
     calcCamHeight();
   }
   else if (event.keyCode == '68') { // d
-    camera.position.x += 2;
+    capsule.position.x += 2;
     calcCamHeight();
   }
 
@@ -225,12 +294,12 @@ const keyDown = (event) => {
 const calcCamHeight = () => {
 
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
-  raycaster.set(camera.position, new THREE.Vector3(0, -1, -1));
+  raycaster.set(capsule.position, new THREE.Vector3(0, -1, 0));
 
   var intersects = raycaster.intersectObjects(terrainTiles);
 
-  if (distance > intersects[0].distance) camera.position.y += (distance - intersects[0].distance) - 1;
-  else camera.position.y -= intersects[0].distance - distance;
+  if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
+  else capsule.position.y -= intersects[0].distance - distance;
   
 }
 
@@ -248,7 +317,8 @@ const showStats = () => {
 const render = () => {
 
   statsPanel.begin();
-  // controls.update();
+  controls.update();
+  thirdPersonCamUpdate();
   renderer.render(scene, camera);
   statsPanel.end();
 
