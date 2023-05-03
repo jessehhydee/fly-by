@@ -15,6 +15,8 @@ renderer,
 controls,
 raycaster,
 distance,
+currentPos,
+currentLookAt,
 capsule,
 centerTile,
 amountOfHexInTile,
@@ -34,13 +36,6 @@ textures,
 terrainTiles,
 activeTile,
 statsPanel;
-
-activeTile = '{"x":-40,"y":-40}'; // REMOVE ONCE TILE CLEAN UP IS BUILT
-
-let 
-currentPos,
-currentLookAt;
-
 
 const setScene = async () => {
 
@@ -110,7 +105,8 @@ const setScene = async () => {
   setRaycast();
   setThirdPersonCam();
   setSphere();
-  createInitialTerrain();
+  createTile();
+  createSurroundingTiles('{"x":-40,"y":-40}');
   calcCamHeight();
   resize();
   listenTo();
@@ -153,36 +149,21 @@ const setSphere = () => {
 
 }
 
-const createInitialTerrain = () => {
+const createSurroundingTiles = (newActiveTile) => {
 
-  createTile();
-
-  tileYNegative();
-
-  tileXPositive();
-
-  tileYPositive();
-  tileYPositive();
-
-  tileXNegative();
-  tileXNegative();
-
-  tileYNegative();
-  tileYNegative();
-
-}
-
-const createSurroundingTile = (newActiveTile) => {
+  const setCenterTile = (parsedCoords) => {
+    centerTile = {
+      xFrom:  parsedCoords.x,
+      xTo:    parsedCoords.x + 81,
+      yFrom:  parsedCoords.y,
+      yTo:    parsedCoords.y + 81
+    }
+  }
 
   console.log('NEW TILE');
   const parsedCoords = JSON.parse(newActiveTile);
 
-  centerTile = {
-    xFrom:  parsedCoords.x,
-    xTo:    parsedCoords.x + 81,
-    yFrom:  parsedCoords.y,
-    yTo:    parsedCoords.y + 81
-  }
+  setCenterTile(parsedCoords);
 
   tileYNegative();
 
@@ -196,6 +177,10 @@ const createSurroundingTile = (newActiveTile) => {
 
   tileYNegative();
   tileYNegative();
+
+  setCenterTile(parsedCoords);
+
+  cleanUp();
 
   activeTile = newActiveTile;
 
@@ -224,6 +209,13 @@ const tileXPositive = () => {
 
 const createTile = () => {
 
+  if(
+    terrainTiles.some(el => el.name === JSON.stringify({
+      x: centerTile.xFrom,
+      y: centerTile.yFrom
+    }))
+  ) return; // Returns if tile already exists
+
   const tileToPosition = (tileX, height, tileY) => {
     return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.68, height / 2, tileY * 1.535);
   }
@@ -243,7 +235,7 @@ const createTile = () => {
   const manipulator = new THREE.Object3D();
   const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
   const mesh        = setHexMesh(geo);
-  mesh.name = JSON.stringify({
+  mesh.name         = JSON.stringify({
     x: centerTile.xFrom,
     y: centerTile.yFrom
   });
@@ -283,6 +275,36 @@ const createTile = () => {
   }
 
   scene.add(mesh);
+
+}
+
+const cleanUp = () => {
+
+  for(let i = terrainTiles.length - 1; i >= 0; i--) {
+
+    let tileCoords  = JSON.parse(terrainTiles[i].name);
+    tileCoords      = {
+      xFrom:  tileCoords.x,
+      xTo:    tileCoords.x + 81,
+      yFrom:  tileCoords.y,
+      yTo:    tileCoords.y + 81
+    }
+
+    if(
+      tileCoords.xFrom < centerTile.xFrom - 81 ||
+      tileCoords.xTo > centerTile.xTo + 81 ||
+      tileCoords.yFrom < centerTile.yFrom - 81 ||
+      tileCoords.yTo > centerTile.yTo + 81
+    ) {
+      const tile = scene.getObjectByProperty('name', terrainTiles[i].name);
+      tile.geometry.dispose();
+      tile.material.dispose();
+      scene.remove(tile);
+      renderer.renderLists.dispose();
+      terrainTiles.splice(i, 1);
+    }
+
+  }
 
 }
 
@@ -333,7 +355,7 @@ const calcCamHeight = (movingForward = true) => {
 
   var intersects = raycaster.intersectObjects(terrainTiles);
 
-  if(activeTile !== intersects[0].object.name) createSurroundingTile(intersects[0].object.name);
+  if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
   if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
   else capsule.position.y -= intersects[0].distance - distance;
