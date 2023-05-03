@@ -17,6 +17,7 @@ raycaster,
 distance,
 capsule,
 centerTile,
+amountOfHexInTile,
 simplex,
 maxHeight,
 snowHeight,
@@ -45,7 +46,9 @@ const setScene = async () => {
     height: container.offsetHeight
   };
 
-  scene   = new THREE.Scene();
+  scene             = new THREE.Scene();
+  scene.background  = new THREE.Color(0xcccccc);
+  scene.fog         = new THREE.Fog(0xcccccc, 80, 170);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 1000);
   camera.position.set(0, 40, 40);
@@ -68,11 +71,12 @@ const setScene = async () => {
   scene.add(pointLight);
 
   centerTile = {
-    xFrom:  -10,
-    xTo:    10,
-    yFrom:  -10,
-    yTo:    10
+    xFrom:  -40,
+    xTo:    40,
+    yFrom:  -40,
+    yTo:    40
   }
+  amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 10;
   snowHeight            = maxHeight * 0.9;
@@ -103,7 +107,7 @@ const setScene = async () => {
   setRaycast();
   setThirdPersonCam();
   setSphere();
-  createTile();
+  createInitialTerrain();
   resize();
   listenTo();
   showStats();
@@ -123,7 +127,7 @@ const setRaycast = () => {
   THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
 
   raycaster = new THREE.Raycaster();
-  distance  = 3;
+  distance  = 4
   raycaster.firstHitOnly = true;
 
 }
@@ -145,6 +149,46 @@ const setSphere = () => {
 
 }
 
+const createInitialTerrain = () => {
+
+  createTile();
+
+  tileYNegative();
+
+  tileXPositive();
+
+  tileYPositive();
+  tileYPositive();
+
+  tileXNegative();
+  tileXNegative();
+
+  tileYNegative();
+  tileYNegative();
+
+}
+
+const tileYNegative = () => {
+  centerTile.yFrom -= 81;
+  centerTile.yTo -= 81;
+  createTile();
+}
+const tileYPositive = () => {
+  centerTile.yFrom += 81;
+  centerTile.yTo += 81;
+  createTile();
+}
+const tileXNegative = () => {
+  centerTile.xFrom -= 81;
+  centerTile.xTo -= 81;
+  createTile();
+}
+const tileXPositive = () => {
+  centerTile.xFrom += 81;
+  centerTile.xTo += 81;
+  createTile();
+}
+
 const createTile = () => {
 
   const tileToPosition = (tileX, height, tileY) => {
@@ -154,7 +198,7 @@ const createTile = () => {
   const setHexMesh = (geo) => {
 
     const mat   = new THREE.MeshStandardMaterial();
-    const mesh  = new THREE.InstancedMesh(geo, mat, 441);
+    const mesh  = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
 
     mesh.castShadow     = true;
     mesh.receiveShadow  = true;
@@ -222,23 +266,23 @@ const resize = () => {
 const keyDown = (event) => {
  
   if (event.keyCode == '38') { // up arrow
-    centerTile.yFrom -= 21;
-    centerTile.yTo -= 21;
+    centerTile.yFrom -= 81;
+    centerTile.yTo -= 81;
     createTile();
   }
   else if (event.keyCode == '40') { // down arrow
-    centerTile.yFrom += 21;
-    centerTile.yTo += 21;
+    centerTile.yFrom += 81;
+    centerTile.yTo += 81;
     createTile();
   }
   else if (event.keyCode == '37') { // left arrow
-    centerTile.xFrom -= 21;
-    centerTile.xTo -= 21;
+    centerTile.xFrom -= 81;
+    centerTile.xTo -= 81;
     createTile();
   }
   else if (event.keyCode == '39') { // right arrow
-    centerTile.xFrom += 21;
-    centerTile.xTo += 21;
+    centerTile.xFrom += 81;
+    centerTile.xTo += 81;
     createTile();
   }
 
@@ -287,7 +331,7 @@ const showStats = () => {
 const thirdPersonCamUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = new THREE.Vector3(3, 9, 16);
+    const idealOffset = new THREE.Vector3(3, 14, 30);
     idealOffset.add(capsule.position)
     return idealOffset;
   }
@@ -301,7 +345,7 @@ const thirdPersonCamUpdate = () => {
   const idealOffset = calcIdealOffset();
   const idealLookat = calcIdealLookat();
 
-  const factor = 0.05;
+  const factor = 0.09;
   currentPos.lerp(idealOffset, factor);
   currentLookAt.lerp(idealLookat, factor);
 
