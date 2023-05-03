@@ -32,7 +32,10 @@ waterHeight,
 deepWaterHeight,
 textures,
 terrainTiles,
+activeTile,
 statsPanel;
+
+activeTile = '{"x":-40,"y":-40}'; // REMOVE ONCE TILE CLEAN UP IS BUILT
 
 let 
 currentPos,
@@ -75,7 +78,7 @@ const setScene = async () => {
     xTo:    40,
     yFrom:  -40,
     yTo:    40
-  }
+  };
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 10;
@@ -108,6 +111,7 @@ const setScene = async () => {
   setThirdPersonCam();
   setSphere();
   createInitialTerrain();
+  calcCamHeight();
   resize();
   listenTo();
   showStats();
@@ -139,9 +143,9 @@ const setThirdPersonCam = () => {
 
 const setSphere = () => {
 
-  const geo     = new THREE.CapsuleGeometry(1, 1, 4, 14); 
-  const mat     = new THREE.MeshBasicMaterial({color: 0x000000}); 
-  capsule       = new THREE.Mesh(geo, mat); 
+  const geo = new THREE.CapsuleGeometry(1, 1, 4, 14); 
+  const mat = new THREE.MeshBasicMaterial({color: 0x000000}); 
+  capsule   = new THREE.Mesh(geo, mat); 
 
   capsule.position.set(0, 10, 0);
   geo.computeBoundsTree();
@@ -165,6 +169,35 @@ const createInitialTerrain = () => {
 
   tileYNegative();
   tileYNegative();
+
+}
+
+const createSurroundingTile = (newActiveTile) => {
+
+  console.log('NEW TILE');
+  const parsedCoords = JSON.parse(newActiveTile);
+
+  centerTile = {
+    xFrom:  parsedCoords.x,
+    xTo:    parsedCoords.x + 81,
+    yFrom:  parsedCoords.y,
+    yTo:    parsedCoords.y + 81
+  }
+
+  tileYNegative();
+
+  tileXPositive();
+
+  tileYPositive();
+  tileYPositive();
+
+  tileXNegative();
+  tileXNegative();
+
+  tileYNegative();
+  tileYNegative();
+
+  activeTile = newActiveTile;
 
 }
 
@@ -210,6 +243,10 @@ const createTile = () => {
   const manipulator = new THREE.Object3D();
   const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
   const mesh        = setHexMesh(geo);
+  mesh.name = JSON.stringify({
+    x: centerTile.xFrom,
+    y: centerTile.yFrom
+  });
   geo.computeBoundsTree();
   terrainTiles.push(mesh);
   
@@ -265,41 +302,25 @@ const resize = () => {
 
 const keyDown = (event) => {
  
-  if (event.keyCode == '38') { // up arrow
-    centerTile.yFrom -= 81;
-    centerTile.yTo -= 81;
-    createTile();
-  }
-  else if (event.keyCode == '40') { // down arrow
-    centerTile.yFrom += 81;
-    centerTile.yTo += 81;
-    createTile();
-  }
-  else if (event.keyCode == '37') { // left arrow
-    centerTile.xFrom -= 81;
-    centerTile.xTo -= 81;
-    createTile();
-  }
-  else if (event.keyCode == '39') { // right arrow
-    centerTile.xFrom += 81;
-    centerTile.xTo += 81;
-    createTile();
-  }
+  if (event.keyCode == '38') tileYNegative(); // up arrow
+  else if (event.keyCode == '40') tileYPositive(); // down arrow
+  else if (event.keyCode == '37') tileXNegative(); // left arrow
+  else if (event.keyCode == '39') tileXPositive(); // right arrow
 
   if (event.keyCode == '87') { // w
-    capsule.position.z -= 2;
+    capsule.position.z -= 1;
     calcCamHeight(true);
   }
   else if (event.keyCode == '83') { // s
-    capsule.position.z += 2;
+    capsule.position.z += 1;
     calcCamHeight(false);
   }
   else if (event.keyCode == '65') { // a
-    capsule.position.x -= 2;
+    capsule.position.x -= 1;
     calcCamHeight();
   }
   else if (event.keyCode == '68') { // d
-    capsule.position.x += 2;
+    capsule.position.x += 1;
     calcCamHeight();
   }
   
@@ -311,6 +332,8 @@ const calcCamHeight = (movingForward = true) => {
   raycaster.set(capsule.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
 
   var intersects = raycaster.intersectObjects(terrainTiles);
+
+  if(activeTile !== intersects[0].object.name) createSurroundingTile(intersects[0].object.name);
 
   if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
   else capsule.position.y -= intersects[0].distance - distance;
