@@ -50,8 +50,8 @@ const setScene = async () => {
   };
 
   scene             = new THREE.Scene();
-  // scene.background  = new THREE.Color(0xcccccc);
-  // scene.fog         = new THREE.Fog(0xcccccc, 80, 170);
+  scene.background  = new THREE.Color(0xcccccc);
+  scene.fog         = new THREE.Fog(0xcccccc, 80, 170);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 500);
   camera.position.set(0, 40, 40);
@@ -105,7 +105,7 @@ const setScene = async () => {
   terrainTiles = [];
 
   setRaycast();
-  setControls();
+  // setControls();
   setHex();
   setCapsule();
   await setGrass();
@@ -175,19 +175,20 @@ const setGrass = async () => {
   model2.scene.scale.set(7000, 7000, 7000);
   model2.scene.position.set(0,0,0);
   scene.add(model2.scene);
-  const model = await gltfLoader.loadAsync('img/grass/scene.gltf');
-  const mesh  = model.scene.getObjectByName('Object_2');
-  const geo   = mesh.geometry.clone();
-  const mat   = mesh.material.clone();
-  grassMesh   = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
-  geo.computeBoundsTree();
+  console.log(scene);
+
+  // const model = await gltfLoader.loadAsync('img/grass/scene.gltf');
+  // const mesh  = model.scene.getObjectByName('Object_2');
+  // const geo   = mesh.geometry.clone();
+  // const mat   = mesh.material.clone();
+  // grassMesh   = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
+  // geo.computeBoundsTree();
   // return;
 
   // const meshw  = model.scene.getObjectByName('Object_2');
   // meshw.scale.set(80, 80, 80);
   // meshw.position.set(0,0,0);
   // scene.add(meshw);
-  console.log(scene);
 
 }
 
@@ -446,8 +447,8 @@ const thirdPersonCamUpdate = () => {
 const render = () => {
 
   statsPanel.begin();
-  controls.update();
-  // thirdPersonCamUpdate();
+  // controls.updawte();
+  thirdPersonCamUpdate();
   renderer.render(scene, camera);
   statsPanel.end();
 
@@ -456,3 +457,28 @@ const render = () => {
 }
 
 setScene();
+
+
+const dummyNoise = () => {
+  https://www.redblobgames.com/maps/terrain-from-noise/
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {      
+      var nx = x/width - 0.5, ny = y/height - 0.5;
+      var e = (0.83 * noiseE( 1 * nx,  1 * ny)
+             + 0.52 * noiseE( 2 * nx,  2 * ny)
+             + 0.30 * noiseE( 4 * nx,  4 * ny)
+             + 0.08 * noiseE( 8 * nx,  8 * ny)
+             + 0.04 * noiseE(16 * nx, 16 * ny)
+             + 0.02 * noiseE(32 * nx, 32 * ny));
+      e = e / (0.83 + 0.52 + 0.30 + 0.08 + 0.04 + 0.02);
+      e = Math.pow(e, 8.70);
+      var m = (0.71 * noiseM( 1 * nx,  1 * ny)
+             + 0.96 * noiseM( 2 * nx,  2 * ny)
+             + 0.68 * noiseM( 4 * nx,  4 * ny)
+             + 0.75 * noiseM( 8 * nx,  8 * ny)
+             + 0.84 * noiseM(16 * nx, 16 * ny)
+             + 0.97 * noiseM(32 * nx, 32 * ny));
+      m = m / (0.71 + 0.96 + 0.68 + 0.75 + 0.84 + 0.97);
+    }
+  }
+}
