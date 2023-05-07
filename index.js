@@ -21,7 +21,7 @@ currentLookAt,
 hexMesh,
 capsule,
 gltfLoader,
-grassMesh,
+grassMeshes,
 centerTile,
 tileWidth,
 amountOfHexInTile,
@@ -51,32 +51,30 @@ const setScene = async () => {
 
   scene             = new THREE.Scene();
   scene.background  = new THREE.Color(0xcccccc);
-  scene.fog         = new THREE.Fog(0xcccccc, 80, 170);
+  scene.fog         = new THREE.Fog(0xcccccc, 50, 130);
 
-  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 500);
+  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 200);
   camera.position.set(0, 40, 40);
   
   renderer = new THREE.WebGLRenderer({
-    canvas:     canvas,
-    antialias:  false,
-    alpha:      true
+    canvas:           canvas,
+    antialias:        false,
+    powerPreference:  'high-performance'
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio * 0.8, 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
 
   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
   gltfLoader = new GLTFLoader();
   centerTile = {
-    xFrom:  -40,
-    xTo:    40,
-    yFrom:  -40,
-    yTo:    40
+    xFrom:  -25,
+    xTo:    25,
+    yFrom:  -25,
+    yTo:    25
   };
-  tileWidth             = 80;
+  tileWidth             = 50;
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 30;
@@ -111,8 +109,8 @@ const setScene = async () => {
   await setGrass();
   setThirdPersonCam();
   createTile();
-  createSurroundingTiles('{"x":-40,"y":-40}');
-  calcCamHeight();
+  createSurroundingTiles('{"x":-25,"y":-25}');
+  calcCapsulePos();
   resize();
   listenTo();
   showStats();
@@ -142,10 +140,7 @@ const setHex = () => {
   const setHexMesh = (geo) => {
 
     const mat   = new THREE.MeshStandardMaterial();
-    const mesh  = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
-
-    mesh.castShadow     = true;
-    mesh.receiveShadow  = true;
+    const mesh  = new THREE.InstancedMesh(geo, mat, amountOfHexInTile * 9);
   
     return mesh;
 
@@ -171,24 +166,27 @@ const setCapsule = () => {
 
 const setGrass = async () => {
 
-  const model2 = await gltfLoader.loadAsync('img/grass/scene.gltf');
-  model2.scene.scale.set(7000, 7000, 7000);
-  model2.scene.position.set(0,0,0);
-  scene.add(model2.scene);
-  console.log(scene);
+  grassMeshes           = {};
+  const model           = await gltfLoader.loadAsync('img/grass/scene.gltf');
+  const grassMeshNames  = [
+    {
+      varName:  'grassMeshOne',
+      meshName: 'Circle015_Grass_0'
+    },
+    {
+      varName:  'grassMeshTwo',
+      meshName: 'Circle018_Grass_0'
+    }
+  ];
 
-  // const model = await gltfLoader.loadAsync('img/grass/scene.gltf');
-  // const mesh  = model.scene.getObjectByName('Object_2');
-  // const geo   = mesh.geometry.clone();
-  // const mat   = mesh.material.clone();
-  // grassMesh   = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
-  // geo.computeBoundsTree();
-  // return;
+  for(let i = 0; i < grassMeshNames.length; i++) {
+    const mesh  = model.scene.getObjectByName(grassMeshNames[i].meshName);
+    const geo   = mesh.geometry.clone();
+    const mat   = mesh.material.clone();
+    grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
+  }
 
-  // const meshw  = model.scene.getObjectByName('Object_2');
-  // meshw.scale.set(80, 80, 80);
-  // meshw.position.set(0,0,0);
-  // scene.add(meshw);
+  return;
 
 }
 
@@ -272,15 +270,22 @@ const createTile = () => {
 
   const hex         = hexMesh.clone();
   hex.name          = tileName;
-  const grass       = grassMesh.clone();
-  grass.name        = tileName;
+  const grassOne    = grassMeshes.grassMeshOne.clone();
+  grassOne.name     = tileName;
+  const grassTwo    = grassMeshes.grassMeshTwo.clone();
+  grassTwo.name     = tileName;
   terrainTiles.push({
     name:   tileName,
     hex:    hex,
-    grass:  grass.clone()
+    grass:  [
+      grassOne.clone(),
+      grassTwo.clone(),
+    ]
   });
   
-  let counter = 0;
+  let hexCounter      = 0;
+  let grassOneCounter = 0;
+  let grassTwoCounter = 0;
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
@@ -288,38 +293,49 @@ const createTile = () => {
       noise         = Math.pow(noise, 1.9);
       const height  = noise * maxHeight;
 
-      hexManipulator.scale.y = height;
+      hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
 
-      const pos = tileToPosition(i, height, j);
+      const pos = tileToPosition(i, height >= sandHeight ? height : sandHeight, j);
       hexManipulator.position.set(pos.x, pos.y, pos.z);
 
       hexManipulator.updateMatrix();
-      hex.setMatrixAt(counter, hexManipulator.matrix);
+      hex.setMatrixAt(hexCounter, hexManipulator.matrix);
 
-      if(height > snowHeight)               hex.setColorAt(counter, textures.snow);
-      else if(height > lightSnowHeight)     hex.setColorAt(counter, textures.lightSnow);
-      else if(height > rockHeight)          hex.setColorAt(counter, textures.rock);
-      else if(height > forestHeight)        hex.setColorAt(counter, textures.forest);
-      else if(height > lightForestHeight)   hex.setColorAt(counter, textures.lightForest);
+      if(height > snowHeight)               hex.setColorAt(hexCounter, textures.snow);
+      else if(height > lightSnowHeight)     hex.setColorAt(hexCounter, textures.lightSnow);
+      else if(height > rockHeight)          hex.setColorAt(hexCounter, textures.rock);
+      else if(height > forestHeight)        hex.setColorAt(hexCounter, textures.forest);
+      else if(height > lightForestHeight)   hex.setColorAt(hexCounter, textures.lightForest);
       else if(height > grassHeight)         {
-        hex.setColorAt(counter, textures.grass);
-        // grassManipulator.scale.set(6, 6, 6);
-        // grassManipulator.position.set(pos.x, pos.y/3, pos.z);
-        // grassManipulator.updateMatrix();
-        // grass.setMatrixAt(counter, grassManipulator.matrix);
-      }
-      else if(height > sandHeight)          hex.setColorAt(counter, textures.sand);
-      else if(height > shallowWaterHeight)  hex.setColorAt(counter, textures.shallowWater);
-      else if(height > waterHeight)         hex.setColorAt(counter, textures.water);
-      else if(height > deepWaterHeight)     hex.setColorAt(counter, textures.deepWater);
+        hex.setColorAt(hexCounter, textures.grass);
+        grassManipulator.scale.set(0.15, 0.15, 0.15);
+        grassManipulator.rotation.x = -(Math.PI / 2);
+        grassManipulator.position.set(pos.x, pos.y * 2, pos.z);
+        grassManipulator.updateMatrix();
 
-      counter++;
+        if((Math.floor(Math.random() * 3)) === 0)
+          switch (Math.floor(Math.random() * 2) + 1) {
+            case 1:
+              grassOne.setMatrixAt(grassOneCounter, grassManipulator.matrix);
+              grassOneCounter++;
+              break;
+            case 2:
+              grassTwo.setMatrixAt(grassTwoCounter, grassManipulator.matrix);
+              grassTwoCounter++;
+              break;
+          }
+      }
+      else if(height > sandHeight)          hex.setColorAt(hexCounter, textures.sand);
+      else if(height > shallowWaterHeight)  hex.setColorAt(hexCounter, textures.shallowWater);
+      else if(height > waterHeight)         hex.setColorAt(hexCounter, textures.water);
+      else if(height > deepWaterHeight)     hex.setColorAt(hexCounter, textures.deepWater);
+
+      hexCounter++;
 
     }
   }
 
-  scene.add(hex);
-  // scene.add(hex, grass);
+  scene.add(hex, grassOne, grassTwo);
 
 }
 
@@ -369,53 +385,28 @@ const resize = () => {
 
 const keyDown = (event) => {
  
-  if (event.keyCode == '38') tileYNegative(); // up arrow
-  else if (event.keyCode == '40') tileYPositive(); // down arrow
-  else if (event.keyCode == '37') tileXNegative(); // left arrow
-  else if (event.keyCode == '39') tileXPositive(); // right arrow
+  // if (event.keyCode == '38') tileYNegative(); // up arrow
+  // else if (event.keyCode == '40') tileYPositive(); // down arrow
+  // else if (event.keyCode == '37') tileXNegative(); // left arrow
+  // else if (event.keyCode == '39') tileXPositive(); // right arrow
 
   if (event.keyCode == '87') { // w
     capsule.position.z -= 2;
-    calcCamHeight(true);
+    calcCapsulePos();
   }
   else if (event.keyCode == '83') { // s
     capsule.position.z += 2;
-    calcCamHeight(false);
+    calcCapsulePos(false);
   }
   else if (event.keyCode == '65') { // a
     capsule.position.x -= 2;
-    calcCamHeight();
+    calcCapsulePos();
   }
   else if (event.keyCode == '68') { // d
     capsule.position.x += 2;
-    calcCamHeight();
+    calcCapsulePos();
   }
   
-}
-
-const calcCamHeight = (movingForward = true) => {
-
-  // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
-  raycaster.set(capsule.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
-
-  var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
-
-  if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
-
-  if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
-  else capsule.position.y -= intersects[0].distance - distance;
-  
-}
-
-const listenTo = () => {
-  window.addEventListener('resize', resize.bind(this));
-  window.addEventListener('keydown', keyDown.bind(this));
-}
-
-const showStats = () => {
-  statsPanel = new stats.Stats();
-  statsPanel.showPanel(0);
-  document.body.appendChild(statsPanel.dom);
 }
 
 const thirdPersonCamUpdate = () => {
@@ -435,20 +426,49 @@ const thirdPersonCamUpdate = () => {
   const idealOffset = calcIdealOffset();
   const idealLookat = calcIdealLookat();
 
-  const factor = 0.09;
-  currentPos.lerp(idealOffset, factor);
-  currentLookAt.lerp(idealLookat, factor);
+  // const factor = 0.15;
+  // currentPos.lerp(idealOffset, factor);
+  // currentLookAt.lerp(idealLookat, factor);
+  currentPos.copy(idealOffset);
+  currentLookAt.copy(idealLookat);
 
   camera.position.copy(currentPos);
   camera.lookAt(currentLookAt);
 
 }
 
+const calcCapsulePos = (movingForward = true) => {
+
+  // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
+  raycaster.set(capsule.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
+
+  var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
+
+  if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
+
+  if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
+  else capsule.position.y -= intersects[0].distance - distance;
+
+  thirdPersonCamUpdate();
+  
+}
+
+const listenTo = () => {
+  window.addEventListener('resize', resize.bind(this));
+  window.addEventListener('keydown', keyDown.bind(this));
+}
+
+const showStats = () => {
+  statsPanel = new stats.Stats();
+  statsPanel.showPanel(0);
+  document.body.appendChild(statsPanel.dom);
+}
+
 const render = () => {
 
   statsPanel.begin();
-  // controls.updawte();
-  thirdPersonCamUpdate();
+  // controls.update();
+  // thirdPersonCamUpdate();
   renderer.render(scene, camera);
   statsPanel.end();
 
@@ -459,26 +479,26 @@ const render = () => {
 setScene();
 
 
-const dummyNoise = () => {
-  https://www.redblobgames.com/maps/terrain-from-noise/
-  for (var y = 0; y < height; y++) {
-    for (var x = 0; x < width; x++) {      
-      var nx = x/width - 0.5, ny = y/height - 0.5;
-      var e = (0.83 * noiseE( 1 * nx,  1 * ny)
-             + 0.52 * noiseE( 2 * nx,  2 * ny)
-             + 0.30 * noiseE( 4 * nx,  4 * ny)
-             + 0.08 * noiseE( 8 * nx,  8 * ny)
-             + 0.04 * noiseE(16 * nx, 16 * ny)
-             + 0.02 * noiseE(32 * nx, 32 * ny));
-      e = e / (0.83 + 0.52 + 0.30 + 0.08 + 0.04 + 0.02);
-      e = Math.pow(e, 8.70);
-      var m = (0.71 * noiseM( 1 * nx,  1 * ny)
-             + 0.96 * noiseM( 2 * nx,  2 * ny)
-             + 0.68 * noiseM( 4 * nx,  4 * ny)
-             + 0.75 * noiseM( 8 * nx,  8 * ny)
-             + 0.84 * noiseM(16 * nx, 16 * ny)
-             + 0.97 * noiseM(32 * nx, 32 * ny));
-      m = m / (0.71 + 0.96 + 0.68 + 0.75 + 0.84 + 0.97);
-    }
-  }
-}
+// const dummyNoise = () => {
+//   https://www.redblobgames.com/maps/terrain-from-noise/
+//   for (var y = 0; y < height; y++) {
+//     for (var x = 0; x < width; x++) {      
+//       var nx = x/width - 0.5, ny = y/height - 0.5;
+//       var e = (0.83 * noiseE( 1 * nx,  1 * ny)
+//              + 0.52 * noiseE( 2 * nx,  2 * ny)
+//              + 0.30 * noiseE( 4 * nx,  4 * ny)
+//              + 0.08 * noiseE( 8 * nx,  8 * ny)
+//              + 0.04 * noiseE(16 * nx, 16 * ny)
+//              + 0.02 * noiseE(32 * nx, 32 * ny));
+//       e = e / (0.83 + 0.52 + 0.30 + 0.08 + 0.04 + 0.02);
+//       e = Math.pow(e, 8.70);
+//       var m = (0.71 * noiseM( 1 * nx,  1 * ny)
+//              + 0.96 * noiseM( 2 * nx,  2 * ny)
+//              + 0.68 * noiseM( 4 * nx,  4 * ny)
+//              + 0.75 * noiseM( 8 * nx,  8 * ny)
+//              + 0.84 * noiseM(16 * nx, 16 * ny)
+//              + 0.97 * noiseM(32 * nx, 32 * ny));
+//       m = m / (0.71 + 0.96 + 0.68 + 0.75 + 0.84 + 0.97);
+//     }
+//   }
+// }
