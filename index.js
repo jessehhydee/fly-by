@@ -8,9 +8,6 @@ import * as stats from 'https://cdn.skypack.dev/three-stats'
 const container = document.querySelector('.container');
 const canvas    = document.querySelector('.canvas');
 
-const createTileWorker  = new Worker("createTile.js", {type: 'module'});
-const cleanUpWorker     = new Worker("cleanUp.js");
-
 let
 sizes,
 scene,
@@ -21,7 +18,6 @@ raycaster,
 distance,
 currentPos,
 currentLookAt,
-hexMesh,
 capsule,
 gltfLoader,
 grassMeshes,
@@ -60,13 +56,12 @@ const setScene = async () => {
   camera.position.set(0, 40, 40);
   
   renderer = new THREE.WebGLRenderer({
-    canvas:           canvas,
-    antialias:        false,
-    powerPreference:  'high-performance'
+    canvas:     canvas,
+    antialias:  false
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio * 0.8, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.autoUpdate = false;
 
   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
@@ -79,7 +74,7 @@ const setScene = async () => {
   };
   tileWidth             = 50;
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
-  // simplex               = new SimplexNoise();
+  simplex               = new SimplexNoise();
   maxHeight             = 30;
   snowHeight            = maxHeight * 0.9;
   lightSnowHeight       = maxHeight * 0.8;
@@ -107,13 +102,12 @@ const setScene = async () => {
 
   setRaycast();
   // setControls();
-  setHex();
   setCapsule();
   await setGrass();
   setThirdPersonCam();
   createTile();
   createSurroundingTiles('{"x":-25,"y":-25}');
-  // calcCapsulePos();
+  calcCapsulePos();
   resize();
   listenTo();
   showStats();
@@ -136,23 +130,6 @@ const setRaycast = () => {
 const setControls = () => {
   controls                 = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping   = true;
-}
-
-const setHex = () => {
-
-  const setHexMesh = (geo) => {
-
-    const mat   = new THREE.MeshStandardMaterial();
-    const mesh  = new THREE.InstancedMesh(geo, mat, amountOfHexInTile * 9);
-  
-    return mesh;
-
-  }
-
-  const geo   = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
-  hexMesh     = setHexMesh(geo);
-  geo.computeBoundsTree();
-
 }
 
 const setCapsule = () => {
@@ -257,111 +234,104 @@ const tileXPositive = () => {
 
 const createTile = () => {
 
-  createTileWorker.postMessage(JSON.stringify({
-    centerTile: centerTile,
-    terrainTiles: terrainTiles,
-    threeObj3D: new THREE.Object3D(),
-    hexMesh: hexMesh.clone(),
-    grassMeshOne: grassMeshes.grassMeshOne.clone(),
-    grassMeshTewo: grassMeshes.grassMeshTwo.clone(),
-    simplex: new SimplexNoise(),
-    maxHeight: maxHeight,
-    textures: textures,
-    snowHeight: snowHeight,
-    lightSnowHeight: lightSnowHeight,
-    rockHeight: rockHeight,
-    forestHeight: forestHeight,
-    lightForestHeight: lightForestHeight,
-    grassHeight: grassHeight,
-    sandHeight: sandHeight,
-    shallowWaterHeight: shallowWaterHeight,
-    waterHeight: waterHeight,
-    deepWaterHeight: deepWaterHeight,
-  }));
-  // createTileWorker.postMessage('terrainTiles');
+  const tileName = JSON.stringify({
+    x: centerTile.xFrom,
+    y: centerTile.yFrom
+  });
 
-  // const tileName = JSON.stringify({
-  //   x: centerTile.xFrom,
-  //   y: centerTile.yFrom
-  // });
+  if(terrainTiles.some(el => el.name === tileName)) return; // Returns if tile already exists
 
-  // if(terrainTiles.some(el => el.name === tileName)) return; // Returns if tile already exists
+  const tileToPosition = (tileX, height, tileY) => {
+    return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.68, height / 2, tileY * 1.535);
+  }
 
-  // const tileToPosition = (tileX, height, tileY) => {
-  //   return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.68, height / 2, tileY * 1.535);
-  // }
+  const setHexMesh = (geo) => {
 
-  // const hexManipulator    = new THREE.Object3D();
-  // const grassManipulator  = new THREE.Object3D();
+    const mat   = new THREE.MeshStandardMaterial();
+    const mesh  = new THREE.InstancedMesh(geo, mat, amountOfHexInTile);
 
-  // const hex         = hexMesh.clone();
-  // hex.name          = tileName;
-  // const grassOne    = grassMeshes.grassMeshOne.clone();
-  // grassOne.name     = tileName;
-  // const grassTwo    = grassMeshes.grassMeshTwo.clone();
-  // grassTwo.name     = tileName;
-  // terrainTiles.push({
-  //   name:   tileName,
-  //   hex:    hex,
-  //   grass:  [
-  //     grassOne.clone(),
-  //     grassTwo.clone(),
-  //   ]
-  // });
+    mesh.castShadow     = true;
+    mesh.receiveShadow  = true;
   
-  // let hexCounter      = 0;
-  // let grassOneCounter = 0;
-  // let grassTwoCounter = 0;
-  // for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
-  //   for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
+    return mesh;
 
-  //     let noise     = (simplex.noise2D(i * 0.02, j * 0.02) + 1) * 0.5;
-  //     noise         = Math.pow(noise, 1.9);
-  //     const height  = noise * maxHeight;
+  }
 
-  //     hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
+  const hexManipulator    = new THREE.Object3D();
+  const grassManipulator  = new THREE.Object3D();
 
-  //     const pos = tileToPosition(i, height >= sandHeight ? height : sandHeight, j);
-  //     hexManipulator.position.set(pos.x, pos.y, pos.z);
+  const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
+  const hex         = setHexMesh(geo);
+  geo.computeBoundsTree();
 
-  //     hexManipulator.updateMatrix();
-  //     hex.setMatrixAt(hexCounter, hexManipulator.matrix);
+  hex.name          = tileName;
+  const grassOne    = grassMeshes.grassMeshOne.clone();
+  grassOne.name     = tileName;
+  const grassTwo    = grassMeshes.grassMeshTwo.clone();
+  grassTwo.name     = tileName;
 
-  //     if(height > snowHeight)               hex.setColorAt(hexCounter, textures.snow);
-  //     else if(height > lightSnowHeight)     hex.setColorAt(hexCounter, textures.lightSnow);
-  //     else if(height > rockHeight)          hex.setColorAt(hexCounter, textures.rock);
-  //     else if(height > forestHeight)        hex.setColorAt(hexCounter, textures.forest);
-  //     else if(height > lightForestHeight)   hex.setColorAt(hexCounter, textures.lightForest);
-  //     else if(height > grassHeight)         {
-  //       hex.setColorAt(hexCounter, textures.grass);
-  //       grassManipulator.scale.set(0.15, 0.15, 0.15);
-  //       grassManipulator.rotation.x = -(Math.PI / 2);
-  //       grassManipulator.position.set(pos.x, pos.y * 2, pos.z);
-  //       grassManipulator.updateMatrix();
+  terrainTiles.push({
+    name:   tileName,
+    hex:    hex,
+    grass:  [
+      grassOne.clone(),
+      grassTwo.clone(),
+    ]
+  });
+  
+  let hexCounter      = 0;
+  let grassOneCounter = 0;
+  let grassTwoCounter = 0;
+  for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
+    for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
-  //       if((Math.floor(Math.random() * 3)) === 0)
-  //         switch (Math.floor(Math.random() * 2) + 1) {
-  //           case 1:
-  //             grassOne.setMatrixAt(grassOneCounter, grassManipulator.matrix);
-  //             grassOneCounter++;
-  //             break;
-  //           case 2:
-  //             grassTwo.setMatrixAt(grassTwoCounter, grassManipulator.matrix);
-  //             grassTwoCounter++;
-  //             break;
-  //         }
-  //     }
-  //     else if(height > sandHeight)          hex.setColorAt(hexCounter, textures.sand);
-  //     else if(height > shallowWaterHeight)  hex.setColorAt(hexCounter, textures.shallowWater);
-  //     else if(height > waterHeight)         hex.setColorAt(hexCounter, textures.water);
-  //     else if(height > deepWaterHeight)     hex.setColorAt(hexCounter, textures.deepWater);
+      let noise     = (simplex.noise2D(i * 0.02, j * 0.02) + 1) * 0.5;
+      noise         = Math.pow(noise, 1.9);
+      const height  = noise * maxHeight;
 
-  //     hexCounter++;
+      hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
 
-  //   }
-  // }
+      const pos = tileToPosition(i, height >= sandHeight ? height : sandHeight, j);
+      hexManipulator.position.set(pos.x, pos.y, pos.z);
 
-  // scene.add(hex, grassOne, grassTwo);
+      hexManipulator.updateMatrix();
+      hex.setMatrixAt(hexCounter, hexManipulator.matrix);
+
+      if(height > snowHeight)               hex.setColorAt(hexCounter, textures.snow);
+      else if(height > lightSnowHeight)     hex.setColorAt(hexCounter, textures.lightSnow);
+      else if(height > rockHeight)          hex.setColorAt(hexCounter, textures.rock);
+      else if(height > forestHeight)        hex.setColorAt(hexCounter, textures.forest);
+      else if(height > lightForestHeight)   hex.setColorAt(hexCounter, textures.lightForest);
+      else if(height > grassHeight)         {
+        hex.setColorAt(hexCounter, textures.grass);
+        grassManipulator.scale.set(0.15, 0.15, 0.15);
+        grassManipulator.rotation.x = -(Math.PI / 2);
+        grassManipulator.position.set(pos.x, pos.y * 2, pos.z);
+        grassManipulator.updateMatrix();
+
+        if((Math.floor(Math.random() * 3)) === 0)
+          switch (Math.floor(Math.random() * 2) + 1) {
+            case 1:
+              grassOne.setMatrixAt(grassOneCounter, grassManipulator.matrix);
+              grassOneCounter++;
+              break;
+            case 2:
+              grassTwo.setMatrixAt(grassTwoCounter, grassManipulator.matrix);
+              grassTwoCounter++;
+              break;
+          }
+      }
+      else if(height > sandHeight)          hex.setColorAt(hexCounter, textures.sand);
+      else if(height > shallowWaterHeight)  hex.setColorAt(hexCounter, textures.shallowWater);
+      else if(height > waterHeight)         hex.setColorAt(hexCounter, textures.water);
+      else if(height > deepWaterHeight)     hex.setColorAt(hexCounter, textures.deepWater);
+
+      hexCounter++;
+
+    }
+  }
+
+  scene.add(hex, grassOne, grassTwo);
 
 }
 
@@ -482,11 +452,6 @@ const calcCapsulePos = (movingForward = true) => {
 const listenTo = () => {
   window.addEventListener('resize', resize.bind(this));
   window.addEventListener('keydown', keyDown.bind(this));
-  createTileWorker.onmessage = (e) => {
-    console.log('Received!', e);
-    terrainTiles = e.data.terrainTiles;
-    scene.add(e.data.hex, e.data.grassOne, e.data.grassTwo);
-  };
 }
 
 const showStats = () => {
