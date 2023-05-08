@@ -347,9 +347,9 @@ const createTile = () => {
 
         hex.setColorAt(hexCounter, textures.forest);
 
-        treeManipulator.scale.set(20.15, 20.15, 20.15);
+        // treeManipulator.scale.set(1, 0.5, 0.5);
         // treeManipulator.rotation.x = -(Math.PI / 2);
-        treeManipulator.position.set(pos.x, pos.y * 2, pos.z);
+        treeManipulator.position.set(pos.x, pos.y * 2.5, pos.z);
         treeManipulator.updateMatrix();
 
         if((Math.floor(Math.random() * 3)) === 0)
@@ -402,7 +402,7 @@ const createTile = () => {
     }
   }
 
-  scene.add(hex, grassOne, grassTwo);
+  scene.add(hex, grassOne, grassTwo, treeOne, treeTwo);
 
 }
 
