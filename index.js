@@ -21,6 +21,7 @@ currentLookAt,
 capsule,
 gltfLoader,
 grassMeshes,
+treeMeshes,
 centerTile,
 tileWidth,
 amountOfHexInTile,
@@ -104,6 +105,7 @@ const setScene = async () => {
   // setControls();
   setCapsule();
   await setGrass();
+  await setTrees();
   setThirdPersonCam();
   createTile();
   createSurroundingTiles('{"x":-25,"y":-25}');
@@ -164,6 +166,34 @@ const setGrass = async () => {
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
     grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
+  }
+
+  return;
+
+}
+
+const setTrees = async () => {
+
+  treeMeshes          = {};
+  const treeMeshNames = [
+    {
+      varName:    'treeMeshOne',
+      modelPath:  'img/trees/pine/scene.gltf',
+      meshName:   'Object_2'
+    },
+    {
+      varName:    'treeMeshTwo',
+      modelPath:  'img/trees/twisted-branches/scene.gltf',
+      meshName:   'Tree_winding_01_Material_0'
+    }
+  ];
+
+  for(let i = 0; i < treeMeshNames.length; i++) {
+    const model  = await gltfLoader.loadAsync(treeMeshNames[i].modelPath);
+    const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
+    const geo   = mesh.geometry.clone();
+    const mat   = mesh.material.clone();
+    treeMeshes[treeMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
   }
 
   return;
@@ -259,15 +289,21 @@ const createTile = () => {
 
   const hexManipulator    = new THREE.Object3D();
   const grassManipulator  = new THREE.Object3D();
+  const treeManipulator   = new THREE.Object3D();
 
   const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
   const hex         = setHexMesh(geo);
+  hex.name          = tileName;
   geo.computeBoundsTree();
 
-  hex.name          = tileName;
   const grassOne    = grassMeshes.grassMeshOne.clone();
   grassOne.name     = tileName;
   const grassTwo    = grassMeshes.grassMeshTwo.clone();
+  grassTwo.name     = tileName;
+
+  const treeOne    = treeMeshes.treeMeshOne.clone();
+  grassOne.name     = tileName;
+  const treeTwo    = treeMeshes.treeMeshTwo.clone();
   grassTwo.name     = tileName;
 
   terrainTiles.push({
@@ -276,12 +312,19 @@ const createTile = () => {
     grass:  [
       grassOne.clone(),
       grassTwo.clone(),
+    ],
+    trees:  [
+      treeOne.clone(),
+      treeTwo.clone(),
     ]
   });
   
   let hexCounter      = 0;
   let grassOneCounter = 0;
   let grassTwoCounter = 0;
+  let treeOneCounter  = 0;
+  let treeTwoCounter  = 0;
+  
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
@@ -300,10 +343,37 @@ const createTile = () => {
       if(height > snowHeight)               hex.setColorAt(hexCounter, textures.snow);
       else if(height > lightSnowHeight)     hex.setColorAt(hexCounter, textures.lightSnow);
       else if(height > rockHeight)          hex.setColorAt(hexCounter, textures.rock);
-      else if(height > forestHeight)        hex.setColorAt(hexCounter, textures.forest);
-      else if(height > lightForestHeight)   hex.setColorAt(hexCounter, textures.lightForest);
-      else if(height > grassHeight)         {
+      else if(height > forestHeight) {
+
+        hex.setColorAt(hexCounter, textures.forest);
+
+        treeManipulator.scale.set(20.15, 20.15, 20.15);
+        // treeManipulator.rotation.x = -(Math.PI / 2);
+        treeManipulator.position.set(pos.x, pos.y * 2, pos.z);
+        treeManipulator.updateMatrix();
+
+        if((Math.floor(Math.random() * 3)) === 0)
+          switch (Math.floor(Math.random() * 2) + 1) {
+            case 1:
+              treeOne.setMatrixAt(treeOneCounter, treeManipulator.matrix);
+              treeOneCounter++;
+              break;
+            case 2:
+              treeTwo.setMatrixAt(treeTwoCounter, treeManipulator.matrix);
+              treeTwoCounter++;
+              break;
+          }
+
+      }
+      else if(height > lightForestHeight) {
+
+        hex.setColorAt(hexCounter, textures.lightForest);
+
+      }
+      else if(height > grassHeight) {
+
         hex.setColorAt(hexCounter, textures.grass);
+
         grassManipulator.scale.set(0.15, 0.15, 0.15);
         grassManipulator.rotation.x = -(Math.PI / 2);
         grassManipulator.position.set(pos.x, pos.y * 2, pos.z);
@@ -320,6 +390,7 @@ const createTile = () => {
               grassTwoCounter++;
               break;
           }
+
       }
       else if(height > sandHeight)          hex.setColorAt(hexCounter, textures.sand);
       else if(height > shallowWaterHeight)  hex.setColorAt(hexCounter, textures.shallowWater);

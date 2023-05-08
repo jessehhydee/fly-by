@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Tree Concept
+* source:	https://sketchfab.com/3d-models/low-poly-tree-concept-e815f8acd6d34528a82feef38d5af880
+* author:	sycoinc (https://sketchfab.com/sycoinc)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Tree Concept" (https://sketchfab.com/3d-models/low-poly-tree-concept-e815f8acd6d34528a82feef38d5af880) by sycoinc (https://sketchfab.com/sycoinc) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
