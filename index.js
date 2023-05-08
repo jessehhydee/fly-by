@@ -108,7 +108,7 @@ const setScene = async () => {
   await setTrees();
   setThirdPersonCam();
   createTile();
-  createSurroundingTiles('{"x":-25,"y":-25}');
+  createSurroundingTiles(`{"x":${centerTile.xFrom},"y":${centerTile.yFrom}}`);
   calcCapsulePos();
   resize();
   listenTo();
@@ -495,9 +495,6 @@ const thirdPersonCamUpdate = () => {
   const idealOffset = calcIdealOffset();
   const idealLookat = calcIdealLookat();
 
-  // const factor = 0.15;
-  // currentPos.lerp(idealOffset, factor);
-  // currentLookAt.lerp(idealLookat, factor);
   currentPos.copy(idealOffset);
   currentLookAt.copy(idealLookat);
 
