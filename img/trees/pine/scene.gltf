@@ -3,86 +3,142 @@
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 224,
+      "count": 640,
       "max": [
-        578.1685180664063,
-        282.6112060546875,
-        451.65478515625
+        -20.152324676513672,
+        2.2207369804382324,
+        5.117591857910156
       ],
       "min": [
-        345.8518371582031,
-        56.58428955078125,
-        13.900848388671875
+        -24.593799591064453,
+        -2.2207369804382324,
+        1.0208640098571777
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
-      "byteOffset": 2688,
+      "byteOffset": 7680,
       "componentType": 5126,
-      "count": 224,
+      "count": 640,
       "max": [
-        0.9125688672065735,
-        0.9731144905090332,
-        0.49277201294898987
+        0.8273935317993164,
+        0.8493501543998718,
+        0.9999680519104004
       ],
       "min": [
-        -0.9979042410850525,
-        -0.9731569886207581,
-        -1.0
+        -0.9000681042671204,
+        -0.8192839026451111,
+        -0.9996327757835388
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 224,
+      "count": 640,
       "max": [
-        0.9281399846076965,
-        0.767084002494812
+        1.0,
+        0.8186110258102417
       ],
       "min": [
-        0.016070999205112457,
-        0.010714000090956688
+        -0.08010800182819366,
+        -0.10317199677228928
       ],
       "type": "VEC2"
     },
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 315,
+      "count": 954,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 15360,
+      "componentType": 5126,
+      "count": 272,
+      "max": [
+        -21.879255294799805,
+        0.5034949779510498,
+        1.563918948173523
+      ],
+      "min": [
+        -22.866981506347656,
+        -0.5496469736099243,
+        -0.017998000606894493
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 18624,
+      "componentType": 5126,
+      "count": 272,
+      "max": [
+        0.9783505797386169,
+        0.9782329201698303,
+        0.34669265151023865
+      ],
+      "min": [
+        -0.9922383427619934,
+        -0.9765986204147339,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 5120,
+      "componentType": 5126,
+      "count": 272,
+      "max": [
+        1.0,
+        0.8186110258102417
+      ],
+      "min": [
+        0.0,
+        0.009999999776482582
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 3816,
+      "componentType": 5125,
+      "count": 426,
       "type": "SCALAR"
     }
   ],
   "asset": {
     "extras": {
-      "author": "sycoinc (https://sketchfab.com/sycoinc)",
+      "author": "PtO- (https://sketchfab.com/PtO-)",
       "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
-      "source": "https://sketchfab.com/3d-models/low-poly-tree-concept-e815f8acd6d34528a82feef38d5af880",
-      "title": "Low Poly Tree Concept"
+      "source": "https://sketchfab.com/3d-models/lowpoly-tree-christmastree-green-aa84e2cd2b3549d6b84471f25365127e",
+      "title": "Lowpoly Tree Christmastree green"
     },
-    "generator": "Sketchfab-12.67.0",
+    "generator": "Sketchfab-14.35.0",
     "version": "2.0"
   },
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 1260,
+      "byteLength": 5520,
       "name": "floatBufferViews",
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 1792,
-      "byteOffset": 1260,
+      "byteLength": 7296,
+      "byteOffset": 5520,
       "byteStride": 8,
       "name": "floatBufferViews",
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 5376,
-      "byteOffset": 3052,
+      "byteLength": 21888,
+      "byteOffset": 12816,
       "byteStride": 12,
       "name": "floatBufferViews",
       "target": 34962
@@ -90,24 +146,37 @@
   ],
   "buffers": [
     {
-      "byteLength": 8428,
+      "byteLength": 34704,
       "uri": "scene.bin"
-    }
-  ],
-  "images": [
-    {
-      "uri": "textures/initialShadingGroup_baseColor.png"
     }
   ],
   "materials": [
     {
       "doubleSided": true,
-      "name": "initialShadingGroup",
+      "name": "Material.001",
       "pbrMetallicRoughness": {
-        "baseColorTexture": {
-          "index": 0
-        },
-        "metallicFactor": 0.0
+        "baseColorFactor": [
+          0.03225,
+          0.287043,
+          0.031649,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8314923264607097
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "Material.002",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.108781,
+          0.052187,
+          0.004797,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9346014336469337
       }
     }
   ],
@@ -123,6 +192,21 @@
           },
           "indices": 3,
           "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Object_1",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1,
           "mode": 4
         }
       ]
@@ -155,21 +239,18 @@
     },
     {
       "children": [
-        2
+        2,
+        3
       ],
-      "name": "tree_2.obj.cleaner.materialmerger.gles"
+      "name": "tree1.obj.cleaner.materialmerger.gles"
     },
     {
       "mesh": 0,
       "name": "Object_2"
-    }
-  ],
-  "samplers": [
+    },
     {
-      "magFilter": 9729,
-      "minFilter": 9987,
-      "wrapS": 10497,
-      "wrapT": 10497
+      "mesh": 1,
+      "name": "Object_3"
     }
   ],
   "scene": 0,
@@ -179,12 +260,6 @@
       "nodes": [
         0
       ]
-    }
-  ],
-  "textures": [
-    {
-      "sampler": 0,
-      "source": 0
     }
   ]
 }
