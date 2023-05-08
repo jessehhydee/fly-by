@@ -179,7 +179,7 @@ const setTrees = async () => {
     {
       varName:    'treeMeshOne',
       modelPath:  'img/trees/pine/scene.gltf',
-      meshName:   'Cylinder_0'
+      meshName:   'Object_4'
     },
     {
       varName:    'treeMeshTwo',
@@ -190,12 +190,10 @@ const setTrees = async () => {
 
   for(let i = 0; i < treeMeshNames.length; i++) {
     const model  = await gltfLoader.loadAsync(treeMeshNames[i].modelPath);
-    console.log(model);
     const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
     treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
-    console.log('treeMeshes[treeMeshNames[i].varName].mesh:', treeMeshes[treeMeshNames[i].varName]);
   }
 
   return;
@@ -349,6 +347,7 @@ const createTile = () => {
       else if(height > forestHeight) {
 
         hex.setColorAt(hexCounter, textures.forest);
+        treeTwoManipulator.rotation.y = Math.floor(Math.random() * 3);
         treeTwoManipulator.position.set(pos.x, (pos.y * 2) + Math.abs(treeTwo.geometry.boundingBox.min.y), pos.z);
         treeTwoManipulator.updateMatrix();
 
@@ -362,12 +361,12 @@ const createTile = () => {
 
         hex.setColorAt(hexCounter, textures.lightForest);
 
-        // treeOneManipulator.scale.set(0.35, .35, 0.35);
+        treeOneManipulator.scale.set(0.4, 0.4, 0.4);
         // treeOneManipulator.rotation.x = -(Math.PI / 2);
-        treeOneManipulator.position.set(pos.x, (pos.y * 2) + Math.abs(treeTwo.geometry.boundingBox.min.y), pos.z);
+        treeOneManipulator.position.set(pos.x, (pos.y * 2), pos.z);
         treeOneManipulator.updateMatrix();
 
-        if((Math.floor(Math.random() * 6)) === 0) {
+        if((Math.floor(Math.random() * 10)) === 0) {
           treeOne.setMatrixAt(treeOneCounter, treeOneManipulator.matrix);
           treeOneCounter++;
         }

@@ -1,11 +1,11 @@
 Model Information:
-* title:	Lowpoly Tree Christmastree green
-* source:	https://sketchfab.com/3d-models/lowpoly-tree-christmastree-green-aa84e2cd2b3549d6b84471f25365127e
-* author:	PtO- (https://sketchfab.com/PtO-)
+* title:	Pine tree 1
+* source:	https://sketchfab.com/3d-models/pine-tree-1-fef2cdc5f46a4118ba51eb0b77847400
+* author:	andros.spica (https://sketchfab.com/andros.spica)
 
 Model License:
 * license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 * requirements:	Author must be credited. Commercial use is allowed.
 
 If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Lowpoly Tree Christmastree green" (https://sketchfab.com/3d-models/lowpoly-tree-christmastree-green-aa84e2cd2b3549d6b84471f25365127e) by PtO- (https://sketchfab.com/PtO-) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+This work is based on "Pine tree 1" (https://sketchfab.com/3d-models/pine-tree-1-fef2cdc5f46a4118ba51eb0b77847400) by andros.spica (https://sketchfab.com/andros.spica) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

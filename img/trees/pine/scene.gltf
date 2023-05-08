@@ -3,142 +3,142 @@
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 640,
+      "count": 376,
       "max": [
-        -20.152324676513672,
-        2.2207369804382324,
-        5.117591857910156
+        2.7638022899627686,
+        8.137994766235352,
+        2.6239819526672363
       ],
       "min": [
-        -24.593799591064453,
-        -2.2207369804382324,
-        1.0208640098571777
+        -2.6239821910858154,
+        0.8041973114013672,
+        -2.6239819526672363
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
-      "byteOffset": 7680,
+      "byteOffset": 4512,
       "componentType": 5126,
-      "count": 640,
+      "count": 376,
       "max": [
-        0.8273935317993164,
-        0.8493501543998718,
-        0.9999680519104004
+        0.8672289848327637,
+        0.7694856524467468,
+        0.7732081413269043
       ],
       "min": [
-        -0.9000681042671204,
-        -0.8192839026451111,
-        -0.9996327757835388
+        -0.7577639222145081,
+        -0.9875449538230896,
+        -0.8277648687362671
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 640,
+      "count": 376,
       "max": [
-        1.0,
-        0.8186110258102417
+        0.9900000095367432,
+        0.49000000953674316
       ],
       "min": [
-        -0.08010800182819366,
-        -0.10317199677228928
+        0.01000000536441803,
+        0.01000000536441803
       ],
       "type": "VEC2"
     },
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 954,
+      "count": 552,
       "type": "SCALAR"
     },
     {
       "bufferView": 2,
-      "byteOffset": 15360,
+      "byteOffset": 9024,
       "componentType": 5126,
-      "count": 272,
+      "count": 40,
       "max": [
-        -21.879255294799805,
-        0.5034949779510498,
-        1.563918948173523
+        0.7125362753868103,
+        1.2295150756835938,
+        0.7125349044799805
       ],
       "min": [
-        -22.866981506347656,
-        -0.5496469736099243,
-        -0.017998000606894493
+        -0.7125354409217834,
+        0.01237630844116211,
+        -0.7125349044799805
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
-      "byteOffset": 18624,
+      "byteOffset": 9504,
       "componentType": 5126,
-      "count": 272,
+      "count": 40,
       "max": [
-        0.9783505797386169,
-        0.9782329201698303,
-        0.34669265151023865
+        0.9272052645683289,
+        0.21355657279491425,
+        0.9272052645683289
       ],
       "min": [
-        -0.9922383427619934,
-        -0.9765986204147339,
-        -1.0
+        -0.927205502986908,
+        -1.0,
+        -0.9272053241729736
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 1,
-      "byteOffset": 5120,
+      "byteOffset": 3008,
       "componentType": 5126,
-      "count": 272,
+      "count": 40,
       "max": [
-        1.0,
-        0.8186110258102417
+        0.7599106431007385,
+        0.25991058349609375
       ],
       "min": [
-        0.0,
-        0.009999999776482582
+        0.7400892972946167,
+        0.2400893270969391
       ],
       "type": "VEC2"
     },
     {
       "bufferView": 0,
-      "byteOffset": 3816,
+      "byteOffset": 2208,
       "componentType": 5125,
-      "count": 426,
+      "count": 66,
       "type": "SCALAR"
     }
   ],
   "asset": {
     "extras": {
-      "author": "PtO- (https://sketchfab.com/PtO-)",
+      "author": "andros.spica (https://sketchfab.com/andros.spica)",
       "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
-      "source": "https://sketchfab.com/3d-models/lowpoly-tree-christmastree-green-aa84e2cd2b3549d6b84471f25365127e",
-      "title": "Lowpoly Tree Christmastree green"
+      "source": "https://sketchfab.com/3d-models/pine-tree-1-fef2cdc5f46a4118ba51eb0b77847400",
+      "title": "Pine tree 1"
     },
-    "generator": "Sketchfab-14.35.0",
+    "generator": "Sketchfab-12.68.0",
     "version": "2.0"
   },
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 5520,
+      "byteLength": 2472,
       "name": "floatBufferViews",
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 7296,
-      "byteOffset": 5520,
+      "byteLength": 3328,
+      "byteOffset": 2472,
       "byteStride": 8,
       "name": "floatBufferViews",
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 21888,
-      "byteOffset": 12816,
+      "byteLength": 9984,
+      "byteOffset": 5800,
       "byteStride": 12,
       "name": "floatBufferViews",
       "target": 34962
@@ -146,37 +146,37 @@
   ],
   "buffers": [
     {
-      "byteLength": 34704,
+      "byteLength": 15784,
       "uri": "scene.bin"
     }
   ],
   "materials": [
     {
       "doubleSided": true,
-      "name": "Material.001",
+      "name": "Leaves",
       "pbrMetallicRoughness": {
         "baseColorFactor": [
-          0.03225,
-          0.287043,
-          0.031649,
+          0.00780142,
+          0.0604517,
+          0.0149032,
           1.0
         ],
         "metallicFactor": 0.0,
-        "roughnessFactor": 0.8314923264607097
+        "roughnessFactor": 0.5
       }
     },
     {
       "doubleSided": true,
-      "name": "Material.002",
+      "name": "Bark",
       "pbrMetallicRoughness": {
         "baseColorFactor": [
-          0.108781,
-          0.052187,
-          0.004797,
+          0.0898344,
+          0.0454806,
+          0.0140628,
           1.0
         ],
         "metallicFactor": 0.0,
-        "roughnessFactor": 0.9346014336469337
+        "roughnessFactor": 0.5
       }
     }
   ],
@@ -239,18 +239,48 @@
     },
     {
       "children": [
-        2,
+        2
+      ],
+      "name": "root"
+    },
+    {
+      "children": [
         3
       ],
-      "name": "tree1.obj.cleaner.materialmerger.gles"
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "GLTF_SceneRootNode"
+    },
+    {
+      "children": [
+        4,
+        5
+      ],
+      "name": "Pinetree_01_0"
     },
     {
       "mesh": 0,
-      "name": "Object_2"
+      "name": "Object_4"
     },
     {
       "mesh": 1,
-      "name": "Object_3"
+      "name": "Object_5"
     }
   ],
   "scene": 0,
