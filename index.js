@@ -347,11 +347,12 @@ const createTile = () => {
       else if(height > forestHeight) {
 
         hex.setColorAt(hexCounter, textures.forest);
+        treeTwoManipulator.scale.set(0.8, 0.8, 0.8);
         treeTwoManipulator.rotation.y = Math.floor(Math.random() * 3);
-        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + Math.abs(treeTwo.geometry.boundingBox.min.y), pos.z);
+        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + Math.abs(treeTwo.geometry.boundingBox.min.y) - 1, pos.z);
         treeTwoManipulator.updateMatrix();
 
-        if((Math.floor(Math.random() * 4)) === 0) {
+        if((Math.floor(Math.random() * 6)) === 0) {
           treeTwo.setMatrixAt(treeTwoCounter, treeTwoManipulator.matrix);
           treeTwoCounter++;
         }
@@ -362,7 +363,6 @@ const createTile = () => {
         hex.setColorAt(hexCounter, textures.lightForest);
 
         treeOneManipulator.scale.set(0.4, 0.4, 0.4);
-        // treeOneManipulator.rotation.x = -(Math.PI / 2);
         treeOneManipulator.position.set(pos.x, (pos.y * 2), pos.z);
         treeOneManipulator.updateMatrix();
 
