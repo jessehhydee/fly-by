@@ -51,7 +51,7 @@ const setScene = async () => {
 
   scene             = new THREE.Scene();
   scene.background  = new THREE.Color(0xcccccc);
-  scene.fog         = new THREE.Fog(0xcccccc, 50, 130);
+  scene.fog         = new THREE.Fog(0xcccccc, 50, 110);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 200);
   camera.position.set(0, 40, 40);
@@ -68,12 +68,12 @@ const setScene = async () => {
 
   gltfLoader = new GLTFLoader();
   centerTile = {
-    xFrom:  -25,
-    xTo:    25,
-    yFrom:  -25,
-    yTo:    25
+    xFrom:  -20,
+    xTo:    20,
+    yFrom:  -20,
+    yTo:    20
   };
-  tileWidth             = 50;
+  tileWidth             = 40; // diff between xFrom - xTo (not accounting for 0)
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 30;
@@ -193,7 +193,7 @@ const setTrees = async () => {
     const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
+    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 4));
   }
 
   return;
@@ -292,20 +292,20 @@ const createTile = () => {
   const treeOneManipulator  = new THREE.Object3D();
   const treeTwoManipulator  = new THREE.Object3D();
 
-  const geo         = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
-  const hex         = setHexMesh(geo);
-  hex.name          = tileName;
+  const geo = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false);
+  const hex = setHexMesh(geo);
+  hex.name  = tileName;
   geo.computeBoundsTree();
 
-  const grassOne    = grassMeshes.grassMeshOne.clone();
-  grassOne.name     = tileName;
-  const grassTwo    = grassMeshes.grassMeshTwo.clone();
-  grassTwo.name     = tileName;
+  const grassOne  = grassMeshes.grassMeshOne.clone();
+  grassOne.name   = tileName;
+  const grassTwo  = grassMeshes.grassMeshTwo.clone();
+  grassTwo.name   = tileName;
 
-  const treeOne    = treeMeshes.treeMeshOne.clone();
-  grassOne.name     = tileName;
-  const treeTwo    = treeMeshes.treeMeshTwo.clone();
-  grassTwo.name     = tileName;
+  const treeOne = treeMeshes.treeMeshOne.clone();
+  treeOne.name  = tileName;
+  const treeTwo = treeMeshes.treeMeshTwo.clone();
+  treeTwo.name  = tileName;
 
   terrainTiles.push({
     name:   tileName,
@@ -426,12 +426,18 @@ const cleanUp = () => {
       tileCoords.yFrom < centerTile.yFrom - tileWidth ||
       tileCoords.yTo > centerTile.yTo + tileWidth
     ) {
-      const tile = scene.getObjectByProperty('name', terrainTiles[i].hex.name);
-      tile.geometry.dispose();
-      tile.material.dispose();
-      scene.remove(tile);
-      renderer.renderLists.dispose();
+
+      const tile = scene.getObjectsByProperty('name', terrainTiles[i].hex.name);
+
+      for(let o = 0; o < tile.length; o++) {
+        tile[o].geometry.dispose();
+        tile[o].material.dispose();
+        scene.remove(tile[o]);
+        renderer.renderLists.dispose();
+      }
+
       terrainTiles.splice(i, 1);
+
     }
 
   }
