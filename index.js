@@ -165,7 +165,7 @@ const setGrass = async () => {
     const mesh  = model.scene.getObjectByName(grassMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, amountOfHexInTile / 2);
+    grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 2));
   }
 
   return;
@@ -549,28 +549,3 @@ const render = () => {
 }
 
 setScene();
-
-
-// const dummyNoise = () => {
-//   https://www.redblobgames.com/maps/terrain-from-noise/
-//   for (var y = 0; y < height; y++) {
-//     for (var x = 0; x < width; x++) {      
-//       var nx = x/width - 0.5, ny = y/height - 0.5;
-//       var e = (0.83 * noiseE( 1 * nx,  1 * ny)
-//              + 0.52 * noiseE( 2 * nx,  2 * ny)
-//              + 0.30 * noiseE( 4 * nx,  4 * ny)
-//              + 0.08 * noiseE( 8 * nx,  8 * ny)
-//              + 0.04 * noiseE(16 * nx, 16 * ny)
-//              + 0.02 * noiseE(32 * nx, 32 * ny));
-//       e = e / (0.83 + 0.52 + 0.30 + 0.08 + 0.04 + 0.02);
-//       e = Math.pow(e, 8.70);
-//       var m = (0.71 * noiseM( 1 * nx,  1 * ny)
-//              + 0.96 * noiseM( 2 * nx,  2 * ny)
-//              + 0.68 * noiseM( 4 * nx,  4 * ny)
-//              + 0.75 * noiseM( 8 * nx,  8 * ny)
-//              + 0.84 * noiseM(16 * nx, 16 * ny)
-//              + 0.97 * noiseM(32 * nx, 32 * ny));
-//       m = m / (0.71 + 0.96 + 0.68 + 0.75 + 0.84 + 0.97);
-//     }
-//   }
-// }
