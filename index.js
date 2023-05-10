@@ -50,8 +50,8 @@ const setScene = async () => {
   };
 
   scene             = new THREE.Scene();
-  scene.background  = new THREE.Color(0xcccccc);
-  scene.fog         = new THREE.Fog(0xcccccc, 50, 110);
+  scene.background  = new THREE.Color(0xf5e6d3);
+  scene.fog         = new THREE.Fog(0xf5e6d3, 50, 110);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 200);
   camera.position.set(0, 40, 40);
