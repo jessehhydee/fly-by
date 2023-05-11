@@ -139,7 +139,7 @@ const setControls = () => {
 const setCapsule = () => {
 
   const geo = new THREE.CapsuleGeometry(1, 1, 2, 8); 
-  const mat = new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true}); 
+  const mat = new THREE.MeshBasicMaterial({color: 0x000000}); 
   capsule   = new THREE.Mesh(geo, mat); 
 
   capsule.position.set(0, 10, 0);
@@ -463,7 +463,6 @@ const resize = () => {
 const keyDown = (event) => {
   if(activeKeysPressed.length < 2 && !activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
-  determineMovement();
 }
 
 const keyUp = (event) => {
@@ -522,13 +521,15 @@ const thirdPersonCamUpdate = () => {
 
   const calcIdealOffset = () => {
     const idealOffset = new THREE.Vector3(3, 14, 30);
-    idealOffset.add(capsule.position)
+    idealOffset.applyQuaternion(capsule.quaternion);
+    idealOffset.add(capsule.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
     const idealLookat = new THREE.Vector3(0, -5, -25);
-    idealLookat.add(capsule.position)
+    idealLookat.applyQuaternion(capsule.quaternion);
+    idealLookat.add(capsule.position);
     return idealLookat;
   }
 
@@ -575,7 +576,7 @@ const render = () => {
 
   statsPanel.begin();
   // controls.update();
-  // thirdPersonCamUpdate();
+  if(activeKeysPressed.length) determineMovement();
   renderer.render(scene, camera);
   statsPanel.end();
 
