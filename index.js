@@ -167,7 +167,7 @@ const setGrass = async () => {
     const mesh  = model.scene.getObjectByName(grassMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 2));
+    grassMeshes[grassMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 5));
   }
 
   return;
@@ -195,7 +195,7 @@ const setTrees = async () => {
     const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 4));
+    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 5));
   }
 
   return;
@@ -331,8 +331,8 @@ const createTile = () => {
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
-      let noise     = (simplex.noise2D(i * 0.02, j * 0.02) + 1) * 0.5;
-      noise         = Math.pow(noise, 1.9);
+      let noise     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.5;
+      noise         = Math.pow(noise, 2);
       const height  = noise * maxHeight;
 
       hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
