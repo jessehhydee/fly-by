@@ -18,6 +18,7 @@ raycaster,
 distance,
 currentPos,
 currentLookAt,
+thirdPerson,
 capsule,
 gltfLoader,
 grassMeshes,
@@ -108,7 +109,7 @@ const setScene = async () => {
   setCapsule();
   await setGrass();
   await setTrees();
-  setThirdPersonCam();
+  setCam();
   createTile();
   createSurroundingTiles(`{"x":${centerTile.xFrom},"y":${centerTile.yFrom}}`);
   calcCapsulePos();
@@ -143,6 +144,7 @@ const setCapsule = () => {
   capsule   = new THREE.Mesh(geo, mat); 
 
   capsule.position.set(0, 10, 0);
+  capsule.scale.set(0.4, 0.4, 0.4);
   geo.computeBoundsTree();
   scene.add(capsule);
 
@@ -202,9 +204,10 @@ const setTrees = async () => {
 
 }
 
-const setThirdPersonCam = () => {
+const setCam = () => {
   currentPos    = new THREE.Vector3();
   currentLookAt = new THREE.Vector3();
+  thirdPerson   = true;
 }
 
 const createSurroundingTiles = (newActiveTile) => {
@@ -461,8 +464,15 @@ const resize = () => {
 }
 
 const keyDown = (event) => {
-  if(activeKeysPressed.length < 2 && !activeKeysPressed.includes(event.keyCode)) 
+
+  if(event.keyCode === 81) {
+    thirdPerson ? thirdPerson = false : thirdPerson = true;
+    camUpdate();
+  }
+
+  if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
+    
 }
 
 const keyUp = (event) => {
@@ -474,60 +484,62 @@ const determineMovement = () => {
 
   if(activeKeysPressed.length === 1) {
     if (activeKeysPressed[0] === 87) { // w
-      capsule.translateZ(-2);
+      capsule.translateZ(-1);
       calcCapsulePos();
     }
     else if (activeKeysPressed[0] === 83) { // s
-      capsule.translateZ(2);
+      capsule.translateZ(1);
       calcCapsulePos(false);
     }
     else if (activeKeysPressed[0] === 65) { // a
       capsule.rotateY(0.05);
-      capsule.translateZ(-1);
+      capsule.translateZ(-0.5);
       calcCapsulePos();
     }
     else if (activeKeysPressed[0] === 68) { // d
       capsule.rotateY(-0.05);
-      capsule.translateZ(-1);
+      capsule.translateZ(-0.5);
       calcCapsulePos();
     }
   }
   else {
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(65)) {
       capsule.rotateY(0.05);
-      capsule.translateZ(-2);
+      capsule.translateZ(-1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(68)) {
       capsule.rotateY(-0.05);
-      capsule.translateZ(-2);
+      capsule.translateZ(-1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(65)) {
       capsule.rotateY(0.05);
-      capsule.translateZ(2);
+      capsule.translateZ(1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(68)) {
       capsule.rotateY(-0.05);
-      capsule.translateZ(2);
+      capsule.translateZ(1);
       calcCapsulePos();
     }
   }
 
 }
 
-const thirdPersonCamUpdate = () => {
+const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = new THREE.Vector3(3, 14, 30);
+    let idealOffset;
+    idealOffset = thirdPerson ? new THREE.Vector3(1.2, 7, 12) : new THREE.Vector3(0, 1, 0);
     idealOffset.applyQuaternion(capsule.quaternion);
     idealOffset.add(capsule.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = new THREE.Vector3(0, -5, -25);
+    let idealLookat;
+    idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, -0.5, -20);
     idealLookat.applyQuaternion(capsule.quaternion);
     idealLookat.add(capsule.position);
     return idealLookat;
@@ -556,7 +568,7 @@ const calcCapsulePos = (movingForward = true) => {
   if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
   else capsule.position.y -= intersects[0].distance - distance;
 
-  thirdPersonCamUpdate();
+  camUpdate();
   
 }
 
