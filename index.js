@@ -107,6 +107,7 @@ const setScene = async () => {
   setRaycast();
   // setControls();
   setCapsule();
+  await setCharacter();
   await setGrass();
   await setTrees();
   setCam();
@@ -147,6 +148,18 @@ const setCapsule = () => {
   capsule.scale.set(0.4, 0.4, 0.4);
   geo.computeBoundsTree();
   scene.add(capsule);
+
+}
+
+const setCharacter = async () => {
+
+  const model = await gltfLoader.loadAsync('img/char/scene.gltf');
+  model.scene.position.set(0, 10, -20);
+  model.scene.scale.set(4, 4, 4);
+  console.log(model);
+  scene.add(model.scene);
+
+  return;
 
 }
 
@@ -530,16 +543,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    let idealOffset;
-    idealOffset = thirdPerson ? new THREE.Vector3(1.2, 7, 12) : new THREE.Vector3(0, 1, 0);
+    const idealOffset = thirdPerson ? new THREE.Vector3(1.2, 7, 12) : new THREE.Vector3(0, 1, 0);
     idealOffset.applyQuaternion(capsule.quaternion);
     idealOffset.add(capsule.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    let idealLookat;
-    idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, -0.5, -20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, -0.5, -20);
     idealLookat.applyQuaternion(capsule.quaternion);
     idealLookat.add(capsule.position);
     return idealLookat;
