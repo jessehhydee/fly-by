@@ -1,11 +1,11 @@
 Model Information:
-* title:	Wolf - LowPoly
-* source:	https://sketchfab.com/3d-models/wolf-lowpoly-9bfb5c07ef3e44e58bcef3361fa6fd91
-* author:	Mysticreator (https://sketchfab.com/Mysticreator)
+* title:	Low poly dire wolf (Canis dirus)
+* source:	https://sketchfab.com/3d-models/low-poly-dire-wolf-canis-dirus-c8c896a1c0c44daeab7387a5f3e64922
+* author:	Natural History Museum of Los Angeles County (https://sketchfab.com/NHMLA)
 
 Model License:
-* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
-* requirements:	Author must be credited. Commercial use is allowed.
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
 
 If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Wolf - LowPoly" (https://sketchfab.com/3d-models/wolf-lowpoly-9bfb5c07ef3e44e58bcef3361fa6fd91) by Mysticreator (https://sketchfab.com/Mysticreator) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+This work is based on "Low poly dire wolf (Canis dirus)" (https://sketchfab.com/3d-models/low-poly-dire-wolf-canis-dirus-c8c896a1c0c44daeab7387a5f3e64922) by Natural History Museum of Los Angeles County (https://sketchfab.com/NHMLA) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

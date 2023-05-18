@@ -13,6 +13,7 @@ sizes,
 scene,
 camera,
 renderer,
+clock,
 controls,
 raycaster,
 distance,
@@ -20,6 +21,10 @@ currentPos,
 currentLookAt,
 thirdPerson,
 capsule,
+character,
+mixer,
+charAnimations,
+activeAction,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -65,6 +70,7 @@ const setScene = async () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputEncoding = THREE.sRGBEncoding;
+  clock = new THREE.Clock();
 
   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
@@ -106,7 +112,7 @@ const setScene = async () => {
 
   setRaycast();
   // setControls();
-  setCapsule();
+  // setCapsule();
   await setCharacter();
   await setGrass();
   await setTrees();
@@ -151,13 +157,57 @@ const setCapsule = () => {
 
 }
 
+const charAnimate = (
+  playAnimation = true, 
+  animation     = charAnimations.walk, 
+  loop          = false, 
+  duration      = 2
+) => {
+
+  // let action = mixer.clipAction(animation);
+  // action.setLoop(THREE.LoopOnce);
+  // action.play();
+
+  if(!playAnimation) return activeAction.fadeOut(duration);
+
+  // https://discourse.threejs.org/t/how-to-transition-between-animations-smoothly/16004/3
+  if(!activeAction) activeAction  = animation;
+  let previousAction  = activeAction;
+  activeAction        = animation;
+
+  if(previousAction !== activeAction) previousAction.fadeOut(duration);
+
+  activeAction
+    .reset()
+    .setEffectiveTimeScale(1)
+    .setEffectiveWeight(1)
+    .setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce)
+    .fadeIn(duration)
+    .play();
+
+}
+
 const setCharacter = async () => {
 
   const model = await gltfLoader.loadAsync('img/char/scene.gltf');
-  model.scene.position.set(0, 10, -20);
-  model.scene.scale.set(4, 4, 4);
-  console.log(model);
-  scene.add(model.scene);
+  const geo   = model.scene.getObjectByName('Object_12').geometry.clone();
+  character   = model.scene;
+
+  character.position.set(0, 10, 0);
+  character.scale.set(3, 3, 3);
+  setTimeout(() => character.rotation.y = Math.PI, 100); // Only works after a set time out?
+
+  mixer           = new THREE.AnimationMixer(character);
+  charAnimations  = {
+    idle: mixer.clipAction(model.animations[0]),
+    howl: mixer.clipAction(model.animations[1]),
+    walk: mixer.clipAction(model.animations[2])
+  };
+
+  charAnimate();
+
+  geo.computeBoundsTree();
+  scene.add(character);
 
   return;
 
@@ -497,43 +547,43 @@ const determineMovement = () => {
 
   if(activeKeysPressed.length === 1) {
     if (activeKeysPressed[0] === 87) { // w
-      capsule.translateZ(-1);
+      character.translateZ(-1);
       calcCapsulePos();
     }
     else if (activeKeysPressed[0] === 83) { // s
-      capsule.translateZ(1);
+      character.translateZ(1);
       calcCapsulePos(false);
     }
     else if (activeKeysPressed[0] === 65) { // a
-      capsule.rotateY(0.05);
-      capsule.translateZ(-0.5);
+      character.rotateY(0.05);
+      character.translateZ(-0.5);
       calcCapsulePos();
     }
     else if (activeKeysPressed[0] === 68) { // d
-      capsule.rotateY(-0.05);
-      capsule.translateZ(-0.5);
+      character.rotateY(-0.05);
+      character.translateZ(-0.5);
       calcCapsulePos();
     }
   }
   else {
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(65)) {
-      capsule.rotateY(0.05);
-      capsule.translateZ(-1);
+      character.rotateY(0.05);
+      character.translateZ(-1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(68)) {
-      capsule.rotateY(-0.05);
-      capsule.translateZ(-1);
+      character.rotateY(-0.05);
+      character.translateZ(-1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(65)) {
-      capsule.rotateY(0.05);
-      capsule.translateZ(1);
+      character.rotateY(0.05);
+      character.translateZ(1);
       calcCapsulePos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(68)) {
-      capsule.rotateY(-0.05);
-      capsule.translateZ(1);
+      character.rotateY(-0.05);
+      character.translateZ(1);
       calcCapsulePos();
     }
   }
@@ -544,15 +594,15 @@ const camUpdate = () => {
 
   const calcIdealOffset = () => {
     const idealOffset = thirdPerson ? new THREE.Vector3(1.2, 7, 12) : new THREE.Vector3(0, 1, 0);
-    idealOffset.applyQuaternion(capsule.quaternion);
-    idealOffset.add(capsule.position);
+    idealOffset.applyQuaternion(character.quaternion);
+    idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
     const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, -0.5, -20);
-    idealLookat.applyQuaternion(capsule.quaternion);
-    idealLookat.add(capsule.position);
+    idealLookat.applyQuaternion(character.quaternion);
+    idealLookat.add(character.position);
     return idealLookat;
   }
 
@@ -570,14 +620,14 @@ const camUpdate = () => {
 const calcCapsulePos = (movingForward = true) => {
 
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
-  raycaster.set(capsule.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
+  raycaster.set(character.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
 
   var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
 
   if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
-  if (distance > intersects[0].distance) capsule.position.y += (distance - intersects[0].distance) - 1;
-  else capsule.position.y -= intersects[0].distance - distance;
+  if (distance > intersects[0].distance) character.position.y += (distance - intersects[0].distance) - 1;
+  else character.position.y -= intersects[0].distance - distance;
 
   camUpdate();
   
@@ -600,6 +650,7 @@ const render = () => {
   statsPanel.begin();
   // controls.update();
   if(activeKeysPressed.length) determineMovement();
+  if(mixer) mixer.update(clock.getDelta());
   renderer.render(scene, camera);
   statsPanel.end();
 
