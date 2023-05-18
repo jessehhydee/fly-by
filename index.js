@@ -24,7 +24,9 @@ capsule,
 character,
 mixer,
 charAnimations,
-activeAction,
+walk,
+walking,
+charIdleInterval,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -119,7 +121,7 @@ const setScene = async () => {
   setCam();
   createTile();
   createSurroundingTiles(`{"x":${centerTile.xFrom},"y":${centerTile.yFrom}}`);
-  calcCapsulePos();
+  calcCharPos();
   resize();
   listenTo();
   showStats();
@@ -157,33 +159,48 @@ const setCapsule = () => {
 
 }
 
-const charAnimate = (
-  playAnimation = true, 
-  animation     = charAnimations.walk, 
-  loop          = false, 
-  duration      = 2
-) => {
+const charAnimate = () => {
 
-  // let action = mixer.clipAction(animation);
-  // action.setLoop(THREE.LoopOnce);
-  // action.play();
+  if(!walk && walking) {
+    walking = false;
+    charAnimations.walk.fadeOut(0.3);
+  }
 
-  if(!playAnimation) return activeAction.fadeOut(duration);
+  if(!walk && !charIdleInterval) {
 
-  // https://discourse.threejs.org/t/how-to-transition-between-animations-smoothly/16004/3
-  if(!activeAction) activeAction  = animation;
-  let previousAction  = activeAction;
-  activeAction        = animation;
+    charIdleInterval = setInterval(() => {
+      const rand    = Math.floor(Math.random() * 2);
+      const action  = rand === 1 ? charAnimations.idle : charAnimations.howl;
+      action
+        .reset()
+        .setEffectiveTimeScale(1.5)
+        .setEffectiveWeight(1)
+        .setLoop(THREE.LoopOnce)
+        .fadeIn(0.3)
+        .play();
+    }, 11000);
 
-  if(previousAction !== activeAction) previousAction.fadeOut(duration);
+  }
 
-  activeAction
-    .reset()
-    .setEffectiveTimeScale(1)
-    .setEffectiveWeight(1)
-    .setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce)
-    .fadeIn(duration)
-    .play();
+  if(walk && !walking) {
+
+    charAnimations.idle.fadeOut(0.3);
+    charAnimations.howl.fadeOut(0.3);
+
+    walking = true;
+
+    clearInterval(charIdleInterval);
+    charIdleInterval = undefined;
+
+    charAnimations.walk
+      .reset()
+      .setEffectiveTimeScale(1.5)
+      .setEffectiveWeight(1)
+      .setLoop(THREE.LoopRepeat)
+      .fadeIn(0.3)
+      .play();
+
+  }
 
 }
 
@@ -194,17 +211,15 @@ const setCharacter = async () => {
   character   = model.scene;
 
   character.position.set(0, 10, 0);
-  character.scale.set(3, 3, 3);
-  setTimeout(() => character.rotation.y = Math.PI, 100); // Only works after a set time out?
+  character.scale.set(2.5, 2.5, 2.5);
 
+  walk            = false;
   mixer           = new THREE.AnimationMixer(character);
   charAnimations  = {
     idle: mixer.clipAction(model.animations[0]),
     howl: mixer.clipAction(model.animations[1]),
     walk: mixer.clipAction(model.animations[2])
   };
-
-  charAnimate();
 
   geo.computeBoundsTree();
   scene.add(character);
@@ -547,44 +562,44 @@ const determineMovement = () => {
 
   if(activeKeysPressed.length === 1) {
     if (activeKeysPressed[0] === 87) { // w
-      character.translateZ(-1);
-      calcCapsulePos();
+      character.translateZ(0.25);
+      calcCharPos();
     }
     else if (activeKeysPressed[0] === 83) { // s
-      character.translateZ(1);
-      calcCapsulePos(false);
+      character.translateZ(-0.25);
+      calcCharPos(false);
     }
     else if (activeKeysPressed[0] === 65) { // a
       character.rotateY(0.05);
-      character.translateZ(-0.5);
-      calcCapsulePos();
+      character.translateZ(0.15);
+      calcCharPos();
     }
     else if (activeKeysPressed[0] === 68) { // d
       character.rotateY(-0.05);
-      character.translateZ(-0.5);
-      calcCapsulePos();
+      character.translateZ(0.15);
+      calcCharPos();
     }
   }
   else {
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(65)) {
       character.rotateY(0.05);
-      character.translateZ(-1);
-      calcCapsulePos();
+      character.translateZ(0.25);
+      calcCharPos();
     }
     if(activeKeysPressed.includes(87) && activeKeysPressed.includes(68)) {
       character.rotateY(-0.05);
-      character.translateZ(-1);
-      calcCapsulePos();
+      character.translateZ(0.25);
+      calcCharPos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(65)) {
       character.rotateY(0.05);
-      character.translateZ(1);
-      calcCapsulePos();
+      character.translateZ(-0.25);
+      calcCharPos();
     }
     if(activeKeysPressed.includes(83) && activeKeysPressed.includes(68)) {
       character.rotateY(-0.05);
-      character.translateZ(1);
-      calcCapsulePos();
+      character.translateZ(-0.25);
+      calcCharPos();
     }
   }
 
@@ -593,14 +608,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(1.2, 7, 12) : new THREE.Vector3(0, 1, 0);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-1.2, 7, -12) : new THREE.Vector3(0, 3, 2);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, -0.5, -20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 15) : new THREE.Vector3(0, 0.5, 20);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
@@ -617,7 +632,7 @@ const camUpdate = () => {
 
 }
 
-const calcCapsulePos = (movingForward = true) => {
+const calcCharPos = (movingForward = true) => {
 
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
   raycaster.set(character.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
@@ -627,8 +642,9 @@ const calcCapsulePos = (movingForward = true) => {
   if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
   if (distance > intersects[0].distance) character.position.y += (distance - intersects[0].distance) - 1;
-  else character.position.y -= intersects[0].distance - distance;
-
+  else character.position.y -= intersects[0].distance - distance; 
+  
+  walk = true;
   camUpdate();
   
 }
@@ -648,10 +664,17 @@ const showStats = () => {
 const render = () => {
 
   statsPanel.begin();
+
   // controls.update();
   if(activeKeysPressed.length) determineMovement();
+  else walk = false;
+
   if(mixer) mixer.update(clock.getDelta());
+
+  charAnimate();
+
   renderer.render(scene, camera);
+
   statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
