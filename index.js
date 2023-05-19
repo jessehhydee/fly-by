@@ -412,9 +412,15 @@ const createTile = () => {
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
-      let noise     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.5;
-      noise         = Math.pow(noise, 2);
-      const height  = noise * maxHeight;
+      // let noise     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.6;
+      // noise         = Math.pow(noise, 2);
+      // const height  = noise * maxHeight;
+
+      let noise1     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.3;
+      noise1         = Math.pow(noise1, 1.2);
+      let noise2     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.6;
+      noise2         = Math.pow(noise2, 2);
+      const height   = noise1 * noise2 * maxHeight;
 
       hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
 
