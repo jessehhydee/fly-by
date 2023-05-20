@@ -90,12 +90,12 @@ const setScene = async () => {
   snowHeight            = maxHeight * 0.9;
   lightSnowHeight       = maxHeight * 0.8;
   rockHeight            = maxHeight * 0.7;
-  forestHeight          = maxHeight * 0.6;
-  lightForestHeight     = maxHeight * 0.4;
-  grassHeight           = maxHeight * 0.3;
-  sandHeight            = maxHeight * 0.2;
-  shallowWaterHeight    = maxHeight * 0.14;
-  waterHeight           = maxHeight * 0.08;
+  forestHeight          = maxHeight * 0.45;
+  lightForestHeight     = maxHeight * 0.32;
+  grassHeight           = maxHeight * 0.22;
+  sandHeight            = maxHeight * 0.15;
+  shallowWaterHeight    = maxHeight * 0.1;
+  waterHeight           = maxHeight * 0.05;
   deepWaterHeight       = maxHeight * 0;
   textures              = {
     snow:         new THREE.Color(0xE5E5E5),
@@ -169,16 +169,34 @@ const charAnimate = () => {
   if(!walk && !charIdleInterval) {
 
     charIdleInterval = setInterval(() => {
-      const rand    = Math.floor(Math.random() * 2);
-      const action  = rand === 1 ? charAnimations.idle : charAnimations.howl;
-      action
-        .reset()
-        .setEffectiveTimeScale(1.5)
-        .setEffectiveWeight(1)
-        .setLoop(THREE.LoopOnce)
-        .fadeIn(0.3)
-        .play();
-    }, 11000);
+
+      charAnimations.idle.fadeOut(0.3);
+      charAnimations.howl.fadeOut(0.3);
+
+      const rand = Math.floor(Math.random() * 2);
+
+      setTimeout(() => {
+        if(rand === 1) {
+          charAnimations.idle
+            .reset()
+            .setEffectiveTimeScale(1.5)
+            .setEffectiveWeight(1)
+            .setLoop(THREE.LoopOnce)
+            .fadeIn(0.3)
+            .play();
+        }
+        else {
+          charAnimations.howl
+            .reset()
+            .setEffectiveTimeScale(1.5)
+            .setEffectiveWeight(1)
+            .setLoop(THREE.LoopOnce)
+            .fadeIn(0.3)
+            .play();
+        }
+      }, 400);
+
+    }, 9000);
 
   }
 
@@ -194,7 +212,7 @@ const charAnimate = () => {
 
     charAnimations.walk
       .reset()
-      .setEffectiveTimeScale(1.5)
+      .setEffectiveTimeScale(1.6)
       .setEffectiveWeight(1)
       .setLoop(THREE.LoopRepeat)
       .fadeIn(0.3)
@@ -275,7 +293,7 @@ const setTrees = async () => {
     const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 5));
+    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 7));
   }
 
   return;
@@ -412,14 +430,10 @@ const createTile = () => {
   for(let i = centerTile.xFrom; i <= centerTile.xTo; i++) {
     for(let j = centerTile.yFrom; j <= centerTile.yTo; j++) {
 
-      // let noise     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.6;
-      // noise         = Math.pow(noise, 2);
-      // const height  = noise * maxHeight;
-
-      let noise1     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.3;
+      let noise1     = (simplex.noise2D(i * 0.015, j * 0.015) + 1.3) * 0.3;
       noise1         = Math.pow(noise1, 1.2);
-      let noise2     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.6;
-      noise2         = Math.pow(noise2, 2);
+      let noise2     = (simplex.noise2D(i * 0.015, j * 0.015) + 1) * 0.75;
+      noise2         = Math.pow(noise2, 1.2);
       const height   = noise1 * noise2 * maxHeight;
 
       hexManipulator.scale.y = height >= sandHeight ? height : sandHeight;
@@ -436,12 +450,12 @@ const createTile = () => {
       else if(height > forestHeight) {
 
         hex.setColorAt(hexCounter, textures.forest);
-        treeTwoManipulator.scale.set(0.8, 0.8, 0.8);
+        treeTwoManipulator.scale.set(1.3, 1.5, 1.3);
         treeTwoManipulator.rotation.y = Math.floor(Math.random() * 3);
-        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + Math.abs(treeTwo.geometry.boundingBox.min.y) - 1, pos.z);
+        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + 6, pos.z);
         treeTwoManipulator.updateMatrix();
 
-        if((Math.floor(Math.random() * 6)) === 0) {
+        if((Math.floor(Math.random() * 15)) === 0) {
           treeTwo.setMatrixAt(treeTwoCounter, treeTwoManipulator.matrix);
           treeTwoCounter++;
         }
@@ -614,14 +628,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-1.2, 7, -12) : new THREE.Vector3(0, 3, 2);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.6, 4, -6) : new THREE.Vector3(0, 3, 2);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 15) : new THREE.Vector3(0, 0.5, 20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 12) : new THREE.Vector3(0, 0.5, 20);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
