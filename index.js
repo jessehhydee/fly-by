@@ -20,13 +20,9 @@ distance,
 currentPos,
 currentLookAt,
 thirdPerson,
-capsule,
 character,
 mixer,
-charAnimations,
-walk,
-walking,
-charIdleInterval,
+charAnimation,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -114,7 +110,6 @@ const setScene = async () => {
 
   setRaycast();
   // setControls();
-  // setCapsule();
   await setCharacter();
   await setGrass();
   await setTrees();
@@ -136,7 +131,7 @@ const setRaycast = () => {
   THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
 
   raycaster = new THREE.Raycaster();
-  distance  = 4
+  distance  = 20
   raycaster.firstHitOnly = true;
 
 }
@@ -146,101 +141,28 @@ const setControls = () => {
   controls.enableDamping   = true;
 }
 
-const setCapsule = () => {
-
-  const geo = new THREE.CapsuleGeometry(1, 1, 2, 8); 
-  const mat = new THREE.MeshBasicMaterial({color: 0x000000}); 
-  capsule   = new THREE.Mesh(geo, mat); 
-
-  capsule.position.set(0, 10, 0);
-  capsule.scale.set(0.4, 0.4, 0.4);
-  geo.computeBoundsTree();
-  scene.add(capsule);
-
-}
-
-const charAnimate = () => {
-
-  if(!walk && walking) {
-    walking = false;
-    charAnimations.walk.fadeOut(0.3);
-  }
-
-  if(!walk && !charIdleInterval) {
-
-    charIdleInterval = setInterval(() => {
-
-      charAnimations.idle.fadeOut(0.3);
-      charAnimations.howl.fadeOut(0.3);
-
-      const rand = Math.floor(Math.random() * 2);
-
-      setTimeout(() => {
-        if(rand === 1) {
-          charAnimations.idle
-            .reset()
-            .setEffectiveTimeScale(1.5)
-            .setEffectiveWeight(1)
-            .setLoop(THREE.LoopOnce)
-            .fadeIn(0.3)
-            .play();
-        }
-        else {
-          charAnimations.howl
-            .reset()
-            .setEffectiveTimeScale(1.5)
-            .setEffectiveWeight(1)
-            .setLoop(THREE.LoopOnce)
-            .fadeIn(0.3)
-            .play();
-        }
-      }, 400);
-
-    }, 9000);
-
-  }
-
-  if(walk && !walking) {
-
-    charAnimations.idle.fadeOut(0.3);
-    charAnimations.howl.fadeOut(0.3);
-
-    walking = true;
-
-    clearInterval(charIdleInterval);
-    charIdleInterval = undefined;
-
-    charAnimations.walk
-      .reset()
-      .setEffectiveTimeScale(1.6)
-      .setEffectiveWeight(1)
-      .setLoop(THREE.LoopRepeat)
-      .fadeIn(0.3)
-      .play();
-
-  }
-
-}
-
 const setCharacter = async () => {
 
-  const model = await gltfLoader.loadAsync('img/char/scene.gltf');
-  const geo   = model.scene.getObjectByName('Object_12').geometry.clone();
+  const model = await gltfLoader.loadAsync('img/bird/scene.gltf');
+  const geo   = model.scene.getObjectByName('Bird_roll_env_07lambert10_0').geometry.clone();
   character   = model.scene;
 
   character.position.set(0, 10, 0);
-  character.scale.set(2.5, 2.5, 2.5);
+  character.scale.set(5.3, 5.3, 5.3);
 
-  walk            = false;
-  mixer           = new THREE.AnimationMixer(character);
-  charAnimations  = {
-    idle: mixer.clipAction(model.animations[0]),
-    howl: mixer.clipAction(model.animations[1]),
-    walk: mixer.clipAction(model.animations[2])
-  };
+  mixer         = new THREE.AnimationMixer(character);
+  charAnimation = mixer.clipAction(model.animations[0])
 
   geo.computeBoundsTree();
   scene.add(character);
+
+  charAnimation
+    .reset()
+    .setEffectiveTimeScale(1)
+    .setEffectiveWeight(1)
+    .setLoop(THREE.LoopRepeat)
+    .fadeIn(1)
+    .play();
 
   return;
 
@@ -580,47 +502,20 @@ const keyUp = (event) => {
 
 const determineMovement = () => {
 
-  if(activeKeysPressed.length === 1) {
-    if (activeKeysPressed[0] === 87) { // w
-      character.translateZ(0.25);
-      calcCharPos();
-    }
-    else if (activeKeysPressed[0] === 83) { // s
-      character.translateZ(-0.25);
-      calcCharPos(false);
-    }
-    else if (activeKeysPressed[0] === 65) { // a
-      character.rotateY(0.05);
-      character.translateZ(0.15);
-      calcCharPos();
-    }
-    else if (activeKeysPressed[0] === 68) { // d
-      character.rotateY(-0.05);
-      character.translateZ(0.15);
-      calcCharPos();
-    }
+  character.translateZ(-0.3);
+
+  if(activeKeysPressed.includes(87)) { // w
+    if(distance < 40) distance += 0.3;
   }
-  else {
-    if(activeKeysPressed.includes(87) && activeKeysPressed.includes(65)) {
-      character.rotateY(0.05);
-      character.translateZ(0.25);
-      calcCharPos();
-    }
-    if(activeKeysPressed.includes(87) && activeKeysPressed.includes(68)) {
-      character.rotateY(-0.05);
-      character.translateZ(0.25);
-      calcCharPos();
-    }
-    if(activeKeysPressed.includes(83) && activeKeysPressed.includes(65)) {
-      character.rotateY(0.05);
-      character.translateZ(-0.25);
-      calcCharPos();
-    }
-    if(activeKeysPressed.includes(83) && activeKeysPressed.includes(68)) {
-      character.rotateY(-0.05);
-      character.translateZ(-0.25);
-      calcCharPos();
-    }
+  else if(activeKeysPressed.includes(83)) { // s
+    if(distance > 13) distance -= 0.3;
+  }
+
+  if(activeKeysPressed.includes(65)) { // a
+    character.rotateY(0.006);
+  }
+  if(activeKeysPressed.includes(68)) { // d
+    character.rotateY(-0.006);
   }
 
 }
@@ -628,14 +523,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.6, 4, -6) : new THREE.Vector3(0, 3, 2);
+    const idealOffset = thirdPerson ? new THREE.Vector3(0.5, 7, 10) : new THREE.Vector3(0, 3, -2);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 12) : new THREE.Vector3(0, 0.5, 20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, 0.5, -20);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
@@ -652,10 +547,10 @@ const camUpdate = () => {
 
 }
 
-const calcCharPos = (movingForward = true) => {
+const calcCharPos = () => {
 
   // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
-  raycaster.set(character.position, new THREE.Vector3(0, -1, movingForward ? -0.3 : 0.3));
+  raycaster.set(character.position, new THREE.Vector3(0, -1, -0.1));
 
   var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
 
@@ -664,7 +559,6 @@ const calcCharPos = (movingForward = true) => {
   if (distance > intersects[0].distance) character.position.y += (distance - intersects[0].distance) - 1;
   else character.position.y -= intersects[0].distance - distance; 
   
-  walk = true;
   camUpdate();
   
 }
@@ -686,12 +580,10 @@ const render = () => {
   statsPanel.begin();
 
   // controls.update();
-  if(activeKeysPressed.length) determineMovement();
-  else walk = false;
+  determineMovement();
+  calcCharPos();
 
   if(mixer) mixer.update(clock.getDelta());
-
-  charAnimate();
 
   renderer.render(scene, camera);
 

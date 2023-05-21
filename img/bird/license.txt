@@ -1,0 +1,11 @@
+Model Information:
+* title:	Flying Bird
+* source:	https://sketchfab.com/3d-models/flying-bird-eb843194e06d429ebef7dd4aa7e265c1
+* author:	sandeep.s (https://sketchfab.com/sandeep.s)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Flying Bird" (https://sketchfab.com/3d-models/flying-bird-eb843194e06d429ebef7dd4aa7e265c1) by sandeep.s (https://sketchfab.com/sandeep.s) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
