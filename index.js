@@ -23,6 +23,7 @@ thirdPerson,
 character,
 mixer,
 charAnimation,
+gliding,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -141,14 +142,40 @@ const setControls = () => {
   controls.enableDamping   = true;
 }
 
+const setCharAnimation = () => {
+
+  const min = 3,
+        max = 14;
+
+  const interval = () => {
+
+    if(!gliding) 
+      charAnimation
+        .reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .setLoop(THREE.LoopRepeat)
+        .fadeIn(1)
+        .play(); 
+    else charAnimation.fadeOut(2);
+    gliding = !gliding;
+
+    const randomTime = Math.floor(Math.random() * (max - min + 1) + min);
+    setTimeout(interval, randomTime * 1000);
+  }
+
+  interval();
+  
+}
+
 const setCharacter = async () => {
 
   const model = await gltfLoader.loadAsync('img/bird/scene.gltf');
-  const geo   = model.scene.getObjectByName('Bird_roll_env_07lambert10_0').geometry.clone();
+  const geo   = model.scene.getObjectByName('Cube001_0').geometry.clone();
   character   = model.scene;
 
   character.position.set(0, 10, 0);
-  character.scale.set(5.3, 5.3, 5.3);
+  character.scale.set(1.3, 1.3, 1.3);
 
   mixer         = new THREE.AnimationMixer(character);
   charAnimation = mixer.clipAction(model.animations[0])
@@ -156,13 +183,7 @@ const setCharacter = async () => {
   geo.computeBoundsTree();
   scene.add(character);
 
-  charAnimation
-    .reset()
-    .setEffectiveTimeScale(1)
-    .setEffectiveWeight(1)
-    .setLoop(THREE.LoopRepeat)
-    .fadeIn(1)
-    .play();
+  setCharAnimation();
 
   return;
 
@@ -502,13 +523,13 @@ const keyUp = (event) => {
 
 const determineMovement = () => {
 
-  character.translateZ(-0.3);
+  character.translateZ(0.3);
 
   if(activeKeysPressed.includes(87)) { // w
     if(distance < 40) distance += 0.3;
   }
   else if(activeKeysPressed.includes(83)) { // s
-    if(distance > 13) distance -= 0.3;
+    if(distance > 14) distance -= 0.3;
   }
 
   if(activeKeysPressed.includes(65)) { // a
@@ -523,14 +544,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(0.5, 7, 10) : new THREE.Vector3(0, 3, -2);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, 7, -10) : new THREE.Vector3(0, 3, 2);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, -15) : new THREE.Vector3(0, 0.5, -20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 15) : new THREE.Vector3(0, 0.5, 20);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
