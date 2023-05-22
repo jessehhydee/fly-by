@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm'
+import { Sky } from 'three/addons/objects/Sky.js';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
-import * as stats from 'https://cdn.skypack.dev/three-stats'
+import * as stats from 'https://cdn.skypack.dev/three-stats';
 
 const container = document.querySelector('.container');
 const canvas    = document.querySelector('.canvas');
@@ -11,8 +12,10 @@ const canvas    = document.querySelector('.canvas');
 let
 sizes,
 scene,
+scene2,
 camera,
 renderer,
+sky,
 clock,
 controls,
 raycaster,
@@ -58,10 +61,11 @@ const setScene = async () => {
   };
 
   scene             = new THREE.Scene();
+  scene2            = new THREE.Scene();
   scene.background  = new THREE.Color(0xf5e6d3);
-  scene.fog         = new THREE.Fog(0xf5e6d3, 50, 110);
+  scene.fog         = new THREE.Fog(0xf5e6d3, 80, 130);
 
-  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 200);
+  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
   camera.position.set(0, 40, 40);
   
   renderer = new THREE.WebGLRenderer({
@@ -77,12 +81,12 @@ const setScene = async () => {
 
   gltfLoader = new GLTFLoader();
   centerTile = {
-    xFrom:  -20,
-    xTo:    20,
-    yFrom:  -20,
-    yTo:    20
+    xFrom:  -30,
+    xTo:    30,
+    yFrom:  -30,
+    yTo:    30
   };
-  tileWidth             = 40; // diff between xFrom - xTo (not accounting for 0)
+  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 30;
@@ -111,6 +115,8 @@ const setScene = async () => {
   terrainTiles      = [];
   activeKeysPressed = [];
 
+  setSky();
+  setSun();
   setRaycast();
   // setControls();
   await setCharacter();
@@ -124,6 +130,43 @@ const setScene = async () => {
   listenTo();
   showStats();
   render();
+
+}
+
+const setSky = () => {
+  sky = new Sky();
+  sky.scale.setScalar(2000);
+  scene2.add(sky);
+}
+
+const setSun = () => {
+
+  const sun = new THREE.Vector3();
+  const parameters  = {
+    turbidity: 10,
+    rayleigh: 3,
+    mieCoefficient: 0.005,
+    mieDirectionalG: 0.85,
+    elevation: 1,
+    azimuth: 0
+  };
+  let renderTarget;
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+  const phi   = THREE.MathUtils.degToRad(90 - parameters.elevation);
+  const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+  sun.setFromSphericalCoords(1, phi, theta);
+
+  sky.material.uniforms['turbidity'].value = parameters.turbidity;
+  sky.material.uniforms['rayleigh'].value = parameters.rayleigh;
+  sky.material.uniforms['mieCoefficient'].value = parameters.mieCoefficient;
+  sky.material.uniforms['mieDirectionalG'].value = parameters.mieDirectionalG;
+  sky.material.uniforms['sunPosition'].value.copy(sun);
+
+  renderTarget       = pmremGenerator.fromScene(sky);
+  scene2.environment  = renderTarget.texture;
 
 }
 
@@ -640,7 +683,10 @@ const render = () => {
   determineMovement();
   calcCharPos();
   if(mixer) mixer.update(clock.getDelta());
+  renderer.autoClear = true;
   renderer.render(scene, camera);
+  renderer.autoClear = false;
+  renderer.render(scene2, camera);
   statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
