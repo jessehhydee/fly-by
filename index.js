@@ -132,7 +132,7 @@ const setRaycast = () => {
   THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
 
   raycaster = new THREE.Raycaster();
-  distance  = 20
+  distance  = 15;
   raycaster.firstHitOnly = true;
 
 }
@@ -526,10 +526,10 @@ const determineMovement = () => {
   character.translateZ(0.3);
 
   if(activeKeysPressed.includes(87)) { // w
-    if(distance < 40) distance += 0.3;
+    if(character.position.y < 60) character.position.y += 0.3;
   }
   else if(activeKeysPressed.includes(83)) { // s
-    if(distance > 14) distance -= 0.3;
+    if(character.position.y > 15) character.position.y -= 0.3;
   }
 
   if(activeKeysPressed.includes(65)) { // a
@@ -577,8 +577,7 @@ const calcCharPos = () => {
 
   if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
-  if (distance > intersects[0].distance) character.position.y += (distance - intersects[0].distance) - 1;
-  else character.position.y -= intersects[0].distance - distance; 
+  if (intersects[0].distance < distance) character.position.y += (distance - intersects[0].distance);
   
   camUpdate();
   
