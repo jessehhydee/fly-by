@@ -24,6 +24,8 @@ character,
 mixer,
 charAnimation,
 gliding,
+charNeck,
+charBody,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -174,15 +176,18 @@ const setCharacter = async () => {
   const geo   = model.scene.getObjectByName('Cube001_0').geometry.clone();
   character   = model.scene;
 
-  character.position.set(0, 10, 0);
+  character.position.set(0, 25, 0);
   character.scale.set(1.3, 1.3, 1.3);
 
   mixer         = new THREE.AnimationMixer(character);
-  charAnimation = mixer.clipAction(model.animations[0])
+  charAnimation = mixer.clipAction(model.animations[0]);
+
+  charNeck  = character.getObjectByName('Neck_Armature');
+  charBody  = character.getObjectByName('Armature_rootJoint');
 
   geo.computeBoundsTree();
   scene.add(character);
-
+  
   setCharAnimation();
 
   return;
@@ -527,16 +532,50 @@ const determineMovement = () => {
 
   if(activeKeysPressed.includes(87)) { // w
     if(character.position.y < 60) character.position.y += 0.3;
+    if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
+    if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
   }
-  else if(activeKeysPressed.includes(83)) { // s
+  if(activeKeysPressed.includes(83)) { // s
     if(character.position.y > 15) character.position.y -= 0.3;
+    if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
+    if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
   }
 
   if(activeKeysPressed.includes(65)) { // a
     character.rotateY(0.006);
+    if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
+    if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
   }
   if(activeKeysPressed.includes(68)) { // d
     character.rotateY(-0.006);
+    if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
+    if(charBody.rotation.y > -0.4) charBody.rotation.y -= 0.04;
+  }
+
+  // Revert
+
+  if(!activeKeysPressed.includes(87) && !activeKeysPressed.includes(83) ||
+    activeKeysPressed.includes(87) && activeKeysPressed.includes(83)) {
+    if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) {
+      charNeck.rotation.x += 0.06;
+      charBody.rotation.x += 0.04;
+    }
+    if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) {
+      charNeck.rotation.x -= 0.06;
+      charBody.rotation.x -= 0.04;
+    }
+  }
+
+  if(!activeKeysPressed.includes(65) && !activeKeysPressed.includes(68) ||
+    activeKeysPressed.includes(65) && activeKeysPressed.includes(68)) {
+    if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) {
+      charNeck.rotation.y += 0.07;
+      charBody.rotation.y -= 0.04;
+    }
+    if(charNeck.rotation.y > 0 || charBody.rotation.y < 0) {
+      charNeck.rotation.y -= 0.07;
+      charBody.rotation.y += 0.04;
+    }
   }
 
 }
@@ -570,7 +609,6 @@ const camUpdate = () => {
 
 const calcCharPos = () => {
 
-  // https://stackoverflow.com/questions/17443056/threejs-keep-object-on-surface-of-another-object
   raycaster.set(character.position, new THREE.Vector3(0, -1, -0.1));
 
   var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
@@ -598,15 +636,11 @@ const showStats = () => {
 const render = () => {
 
   statsPanel.begin();
-
   // controls.update();
   determineMovement();
   calcCharPos();
-
   if(mixer) mixer.update(clock.getDelta());
-
   renderer.render(scene, camera);
-
   statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
