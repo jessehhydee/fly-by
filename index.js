@@ -12,14 +12,14 @@ const canvas    = document.querySelector('.canvas');
 let
 sizes,
 scene,
-scene2,
 camera,
 renderer,
-sky,
 clock,
 controls,
 raycaster,
 distance,
+movingCharDueToDistance,
+movingCharTimeout,
 currentPos,
 currentLookAt,
 thirdPerson,
@@ -61,9 +61,8 @@ const setScene = async () => {
   };
 
   scene             = new THREE.Scene();
-  scene2            = new THREE.Scene();
   scene.background  = new THREE.Color(0xf5e6d3);
-  scene.fog         = new THREE.Fog(0xf5e6d3, 80, 130);
+  scene.fog         = new THREE.Fog(0xf5e6d3, 80, 120);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
   camera.position.set(0, 40, 40);
@@ -115,8 +114,6 @@ const setScene = async () => {
   terrainTiles      = [];
   activeKeysPressed = [];
 
-  setSky();
-  setSun();
   setRaycast();
   // setControls();
   await setCharacter();
@@ -133,43 +130,6 @@ const setScene = async () => {
 
 }
 
-const setSky = () => {
-  sky = new Sky();
-  sky.scale.setScalar(2000);
-  scene2.add(sky);
-}
-
-const setSun = () => {
-
-  const sun = new THREE.Vector3();
-  const parameters  = {
-    turbidity: 10,
-    rayleigh: 3,
-    mieCoefficient: 0.005,
-    mieDirectionalG: 0.85,
-    elevation: 1,
-    azimuth: 0
-  };
-  let renderTarget;
-
-  const pmremGenerator = new THREE.PMREMGenerator(renderer);
-
-  const phi   = THREE.MathUtils.degToRad(90 - parameters.elevation);
-  const theta = THREE.MathUtils.degToRad(parameters.azimuth);
-
-  sun.setFromSphericalCoords(1, phi, theta);
-
-  sky.material.uniforms['turbidity'].value = parameters.turbidity;
-  sky.material.uniforms['rayleigh'].value = parameters.rayleigh;
-  sky.material.uniforms['mieCoefficient'].value = parameters.mieCoefficient;
-  sky.material.uniforms['mieDirectionalG'].value = parameters.mieDirectionalG;
-  sky.material.uniforms['sunPosition'].value.copy(sun);
-
-  renderTarget       = pmremGenerator.fromScene(sky);
-  scene2.environment  = renderTarget.texture;
-
-}
-
 const setRaycast = () => {
 
   THREE.BufferGeometry.prototype.computeBoundsTree  = computeBoundsTree;
@@ -177,7 +137,8 @@ const setRaycast = () => {
   THREE.Mesh.prototype.raycast                      = acceleratedRaycast;
 
   raycaster = new THREE.Raycaster();
-  distance  = 15;
+  distance  = 14;
+  movingCharDueToDistance = false;
   raycaster.firstHitOnly = true;
 
 }
@@ -441,7 +402,7 @@ const createTile = () => {
       else if(height > forestHeight) {
 
         hex.setColorAt(hexCounter, textures.forest);
-        treeTwoManipulator.scale.set(1.3, 1.5, 1.3);
+        treeTwoManipulator.scale.set(1.1, 1.2, 1.1);
         treeTwoManipulator.rotation.y = Math.floor(Math.random() * 3);
         treeTwoManipulator.position.set(pos.x, (pos.y * 2) + 6, pos.z);
         treeTwoManipulator.updateMatrix();
@@ -578,8 +539,8 @@ const determineMovement = () => {
     if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
     if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
   }
-  if(activeKeysPressed.includes(83)) { // s
-    if(character.position.y > 15) character.position.y -= 0.3;
+  if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
+    if(character.position.y > 22) character.position.y -= 0.3;
     if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
     if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
   }
@@ -645,7 +606,7 @@ const camUpdate = () => {
   currentPos.copy(idealOffset);
   currentLookAt.copy(idealLookat);
 
-  camera.position.copy(currentPos);
+  camera.position.lerp(currentPos, 0.14);
   camera.lookAt(currentLookAt);
 
 }
@@ -658,7 +619,20 @@ const calcCharPos = () => {
 
   if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
-  if (intersects[0].distance < distance) character.position.y += (distance - intersects[0].distance);
+  if (intersects[0].distance < distance) {
+    movingCharDueToDistance = true;
+    character.position.y += 0.1;
+  }
+  else {
+    if(movingCharDueToDistance && !movingCharTimeout) {
+      movingCharTimeout = setTimeout(() => {
+        movingCharDueToDistance = false;
+        movingCharTimeout = undefined;
+      }, 400);
+    }
+    // movingCharDueToDistance = false;
+  }
+  // if (intersects[0].distance < distance) character.position.y += (distance - intersects[0].distance);
   
   camUpdate();
   
@@ -683,10 +657,7 @@ const render = () => {
   determineMovement();
   calcCharPos();
   if(mixer) mixer.update(clock.getDelta());
-  renderer.autoClear = true;
   renderer.render(scene, camera);
-  renderer.autoClear = false;
-  renderer.render(scene2, camera);
   statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
