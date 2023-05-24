@@ -11,6 +11,8 @@ let
 sizes,
 scene,
 camera,
+camY,
+camZ,
 renderer,
 clock,
 raycaster,
@@ -62,7 +64,9 @@ const setScene = async () => {
   scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
-  camera.position.set(0, 40, 40);
+  camera.position.set(0, 70, -100);
+  camY = 70,
+  camZ = -100;
   
   renderer = new THREE.WebGLRenderer({
     canvas:     canvas,
@@ -583,7 +587,7 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, 7, -10) : new THREE.Vector3(0, 3, 2);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 2);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
@@ -604,6 +608,9 @@ const camUpdate = () => {
 
   camera.position.lerp(currentPos, 0.14);
   camera.lookAt(currentLookAt);
+
+  if(camY > 7)    camY -= 0.5;
+  if(camZ < -10)  camZ += 0.5;
 
 }
 
@@ -627,7 +634,7 @@ const calcCharPos = () => {
       }, 600);
     }
   }
-  
+
   camUpdate();
   
 }
