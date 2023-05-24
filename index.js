@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Sky } from 'three/addons/objects/Sky.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
 import * as stats from 'https://cdn.skypack.dev/three-stats';
@@ -15,7 +13,6 @@ scene,
 camera,
 renderer,
 clock,
-controls,
 raycaster,
 distance,
 movingCharDueToDistance,
@@ -62,7 +59,7 @@ const setScene = async () => {
 
   scene             = new THREE.Scene();
   scene.background  = new THREE.Color(0xf5e6d3);
-  scene.fog         = new THREE.Fog(0xf5e6d3, 80, 120);
+  scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
   camera.position.set(0, 40, 40);
@@ -115,7 +112,6 @@ const setScene = async () => {
   activeKeysPressed = [];
 
   setRaycast();
-  // setControls();
   await setCharacter();
   await setGrass();
   await setTrees();
@@ -143,15 +139,11 @@ const setRaycast = () => {
 
 }
 
-const setControls = () => {
-  controls                 = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping   = true;
-}
-
 const setCharAnimation = () => {
 
-  const min = 3,
-        max = 14;
+  const 
+  min = 3,
+  max = 14;
 
   const interval = () => {
 
@@ -404,7 +396,7 @@ const createTile = () => {
         hex.setColorAt(hexCounter, textures.forest);
         treeTwoManipulator.scale.set(1.1, 1.2, 1.1);
         treeTwoManipulator.rotation.y = Math.floor(Math.random() * 3);
-        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + 6, pos.z);
+        treeTwoManipulator.position.set(pos.x, (pos.y * 2) + 5, pos.z);
         treeTwoManipulator.updateMatrix();
 
         if((Math.floor(Math.random() * 15)) === 0) {
@@ -535,14 +527,18 @@ const determineMovement = () => {
   character.translateZ(0.3);
 
   if(activeKeysPressed.includes(87)) { // w
-    if(character.position.y < 60) character.position.y += 0.3;
-    if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
-    if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
+    if(character.position.y < 60) {
+      character.position.y += 0.3;
+      if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
+      if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
+    }
   }
   if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
-    if(character.position.y > 22) character.position.y -= 0.3;
-    if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
-    if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
+    if(character.position.y > 22) {
+      character.position.y -= 0.3;
+      if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
+      if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
+    }
   }
 
   if(activeKeysPressed.includes(65)) { // a
@@ -628,11 +624,9 @@ const calcCharPos = () => {
       movingCharTimeout = setTimeout(() => {
         movingCharDueToDistance = false;
         movingCharTimeout = undefined;
-      }, 400);
+      }, 600);
     }
-    // movingCharDueToDistance = false;
   }
-  // if (intersects[0].distance < distance) character.position.y += (distance - intersects[0].distance);
   
   camUpdate();
   
@@ -653,7 +647,6 @@ const showStats = () => {
 const render = () => {
 
   statsPanel.begin();
-  // controls.update();
   determineMovement();
   calcCharPos();
   if(mixer) mixer.update(clock.getDelta());
