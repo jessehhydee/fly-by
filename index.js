@@ -52,6 +52,8 @@ activeTile,
 activeKeysPressed,
 statsPanel;
 
+let clouds = [];
+
 const setScene = async () => {
 
   sizes = {
@@ -144,35 +146,32 @@ const setRaycast = () => {
 
 }
 
+const animateClouds = () => {
+
+  for(let i = 0; i < clouds.length; i++)
+    clouds[i].position.x = 
+    clouds[i].position.x < 0 
+      ? clouds[i].position.x - (clock.getElapsedTime() * 0.2) 
+      : clouds[i].position.x + (clock.getElapsedTime() * 0.2);
+
+}
+
 const setClouds = async () => {
 
-  const amountOfClouds = 9;
+  const amountOfClouds = 10;
 
   const createClouds = async () => {
     
-    const cloudMeshes     = {};
-    const cloudMeshNames  = [
-      {
-        varName:    'cloudMeshOne',
-        modelPath:  'img/clouds/cloud-one/scene.gltf',
-        meshName:   'Icosphere001_0'
-      },
-      {
-        varName:    'cloudMeshTwo',
-        modelPath:  'img/clouds/cloud-two/scene.gltf',
-        meshName:   'Icosphere002_Material006_0'
-      },
+    const cloudModels     = [];
+    const cloudModelPaths = [
+      'img/clouds/cloud-one/scene.gltf',
+      'img/clouds/cloud-two/scene.gltf'
     ];
   
-    for(let i = 0; i < cloudMeshNames.length; i++) {
-      const model  = await gltfLoader.loadAsync(cloudMeshNames[i].modelPath);
-      const mesh  = model.scene.getObjectByName(cloudMeshNames[i].meshName);
-      const geo   = mesh.geometry.clone();
-      const mat   = mesh.material.clone();
-      cloudMeshes[cloudMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfClouds / 2));
-    }
+    for(let i = 0; i < cloudModelPaths.length; i++)
+      cloudModels[i] = await gltfLoader.loadAsync(cloudModelPaths[i]);
 
-    return cloudMeshes;
+    return cloudModels;
 
   }
 
@@ -180,37 +179,33 @@ const setClouds = async () => {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  const cloudMeshes       = await createClouds();
-  const cloudManipulator  = new THREE.Object3D();
-  let   cloudCounter      = 0;
+  const cloudModels = await createClouds();
 
   for(let i = 0; i < Math.floor(amountOfClouds / 2) * 2; i++) {
 
-    cloudManipulator.position.set(
-      getRandom(-50, 50), 
+    let cloud;
+
+    if(i < Math.floor(amountOfClouds / 2)) { // cloud-one
+      cloud = cloudModels[0].scene.clone();
+      cloud.scale.set(3.5, 3.5, 3.5);
+      cloud.rotation.y = cloud.rotation.z = -(Math.PI / 2);
+    }
+    else { // cloud-two
+      cloud = cloudModels[1].scene.clone();
+      cloud.scale.set(0.02, 0.02, 0.02);
+      cloud.rotation.y = cloud.rotation.z = 0;
+    }
+
+    cloud.position.set(
+      getRandom(-40, 40),
       getRandom(camY - 20, camY - 40), 
       getRandom(camZ + 20, camZ + 150)
     );
 
-    if(i < Math.floor(amountOfClouds / 2)) {
-      cloudManipulator.scale.set(3.5, 3.5, 3.5);
-      cloudManipulator.rotation.y = cloudManipulator.rotation.z = -(Math.PI / 2);
-      cloudManipulator.updateMatrix();
-      cloudMeshes.cloudMeshOne.setMatrixAt(cloudCounter, cloudManipulator.matrix);
-    }
-    else {
-      cloudManipulator.scale.set(0.02, 0.02, 0.02);
-      cloudManipulator.rotation.y = cloudManipulator.rotation.z = 0;
-      cloudManipulator.updateMatrix();
-      cloudMeshes.cloudMeshTwo.setMatrixAt(cloudCounter, cloudManipulator.matrix);
-    }
-
-    if(cloudCounter === Math.floor(amountOfClouds / 2) - 1) cloudCounter = -1;
-    cloudCounter++;
+    scene.add(cloud);
+    clouds.push(cloud);
 
   }
-
-  scene.add(cloudMeshes.cloudMeshOne, cloudMeshes.cloudMeshTwo);
 
   return;
 
@@ -729,6 +724,7 @@ const render = () => {
   statsPanel.begin();
   determineMovement();
   calcCharPos();
+  animateClouds();
   if(mixer) mixer.update(clock.getDelta());
   renderer.render(scene, camera);
   statsPanel.end();
