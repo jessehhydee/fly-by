@@ -63,10 +63,10 @@ const setScene = async () => {
   scene.background  = new THREE.Color(0xf5e6d3);
   scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
+  camY    = 90,
+  camZ    = -110;
   camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
-  camera.position.set(0, 70, -100);
-  camY = 70,
-  camZ = -100;
+  camera.position.set(0, camY, camZ);
   
   renderer = new THREE.WebGLRenderer({
     canvas:     canvas,
@@ -116,6 +116,7 @@ const setScene = async () => {
   activeKeysPressed = [];
 
   setRaycast();
+  await setClouds();
   await setCharacter();
   await setGrass();
   await setTrees();
@@ -140,6 +141,65 @@ const setRaycast = () => {
   distance  = 14;
   movingCharDueToDistance = false;
   raycaster.firstHitOnly = true;
+
+}
+
+const setClouds = async () => {
+
+  const amountOfClouds = 6;
+
+  const createClouds = async () => {
+    
+    const cloudMeshes     = {};
+    const cloudMeshNames  = [
+      {
+        varName:    'treeMeshOne',
+        modelPath:  'img/clouds/cloud-one/scene.gltf',
+        meshName:   'Object_4'
+      },
+      {
+        varName:    'treeMeshTwo',
+        modelPath:  'img/clouds/cloud-two/scene.gltf',
+        meshName:   'Tree_winding_01_Material_0'
+      }
+    ];
+  
+    for(let i = 0; i < cloudMeshNames.length; i++) {
+      const model  = await gltfLoader.loadAsync(cloudMeshNames[i].modelPath);
+      const mesh  = model.scene.getObjectByName(cloudMeshNames[i].meshName);
+      const geo   = mesh.geometry.clone();
+      const mat   = mesh.material.clone();
+      cloudMeshes[cloudMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfClouds / 2));
+    }
+
+    return cloudMeshes;
+
+  }
+
+  const getRandom = (max, min) => {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
+  const cloudMeshes       = await createClouds();
+  const cloudManipulator  = new THREE.Object3D();
+  let   cloudCounter      = 0;
+
+  for(let i = 0; i < Math.floor(amountOfClouds / 2) * 2; i++) {
+
+    camY    = 90,
+    camZ    = -110;
+    cloudManipulator.scale.set(1.1, 1.2, 1.1);
+    cloudManipulator.position.set(0, getRandom(camY - 20, camY - 30), getRandom(camZ + 20, camZ + 60));
+    cloudManipulator.updateMatrix();
+
+    if((Math.floor(Math.random() * 15)) === 0) {
+      treeTwo.setMatrixAt(cloudCounter, cloudManipulator.matrix);
+      cloudCounter++;
+    }
+
+  }
+
+  return;
 
 }
 
@@ -241,7 +301,7 @@ const setTrees = async () => {
     const mesh  = model.scene.getObjectByName(treeMeshNames[i].meshName);
     const geo   = mesh.geometry.clone();
     const mat   = mesh.material.clone();
-    treeMeshes[treeMeshNames[i].varName]   = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 7));
+    treeMeshes[treeMeshNames[i].varName] = new THREE.InstancedMesh(geo, mat, Math.floor(amountOfHexInTile / 7));
   }
 
   return;

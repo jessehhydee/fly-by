@@ -1,0 +1,11 @@
+Model Information:
+* title:	Cloud 3 - Low poly
+* source:	https://sketchfab.com/3d-models/cloud-3-low-poly-aaf34de8ee2f42ca9e843d3b557266a7
+* author:	lightguard (https://sketchfab.com/lightguard)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Cloud 3 - Low poly" (https://sketchfab.com/3d-models/cloud-3-low-poly-aaf34de8ee2f42ca9e843d3b557266a7) by lightguard (https://sketchfab.com/lightguard) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
