@@ -146,22 +146,22 @@ const setRaycast = () => {
 
 const setClouds = async () => {
 
-  const amountOfClouds = 6;
+  const amountOfClouds = 9;
 
   const createClouds = async () => {
     
     const cloudMeshes     = {};
     const cloudMeshNames  = [
       {
-        varName:    'treeMeshOne',
+        varName:    'cloudMeshOne',
         modelPath:  'img/clouds/cloud-one/scene.gltf',
-        meshName:   'Object_4'
+        meshName:   'Icosphere001_0'
       },
       {
-        varName:    'treeMeshTwo',
+        varName:    'cloudMeshTwo',
         modelPath:  'img/clouds/cloud-two/scene.gltf',
-        meshName:   'Tree_winding_01_Material_0'
-      }
+        meshName:   'Icosphere002_Material006_0'
+      },
     ];
   
     for(let i = 0; i < cloudMeshNames.length; i++) {
@@ -186,18 +186,31 @@ const setClouds = async () => {
 
   for(let i = 0; i < Math.floor(amountOfClouds / 2) * 2; i++) {
 
-    camY    = 90,
-    camZ    = -110;
-    cloudManipulator.scale.set(1.1, 1.2, 1.1);
-    cloudManipulator.position.set(0, getRandom(camY - 20, camY - 30), getRandom(camZ + 20, camZ + 60));
-    cloudManipulator.updateMatrix();
+    cloudManipulator.position.set(
+      getRandom(-50, 50), 
+      getRandom(camY - 20, camY - 40), 
+      getRandom(camZ + 20, camZ + 150)
+    );
 
-    if((Math.floor(Math.random() * 15)) === 0) {
-      treeTwo.setMatrixAt(cloudCounter, cloudManipulator.matrix);
-      cloudCounter++;
+    if(i < Math.floor(amountOfClouds / 2)) {
+      cloudManipulator.scale.set(3.5, 3.5, 3.5);
+      cloudManipulator.rotation.y = cloudManipulator.rotation.z = -(Math.PI / 2);
+      cloudManipulator.updateMatrix();
+      cloudMeshes.cloudMeshOne.setMatrixAt(cloudCounter, cloudManipulator.matrix);
+    }
+    else {
+      cloudManipulator.scale.set(0.02, 0.02, 0.02);
+      cloudManipulator.rotation.y = cloudManipulator.rotation.z = 0;
+      cloudManipulator.updateMatrix();
+      cloudMeshes.cloudMeshTwo.setMatrixAt(cloudCounter, cloudManipulator.matrix);
     }
 
+    if(cloudCounter === Math.floor(amountOfClouds / 2) - 1) cloudCounter = -1;
+    cloudCounter++;
+
   }
+
+  scene.add(cloudMeshes.cloudMeshOne, cloudMeshes.cloudMeshTwo);
 
   return;
 
