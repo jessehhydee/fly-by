@@ -179,7 +179,7 @@ const setClouds = async () => {
 
     if(i < Math.floor(amountOfClouds / 2)) { // cloud-one
       cloud = cloudModels[0].scene.clone();
-      cloud.scale.set(3.5, 3.5, 3.5);
+      cloud.scale.set(5.5, 5.5, 5.5);
       cloud.rotation.y = cloud.rotation.z = -(Math.PI / 2);
     }
     else { // cloud-two
