@@ -66,8 +66,8 @@ const setScene = async () => {
   scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
   flyingIn  = true;
-  camY      = 90,
-  camZ      = -110;
+  camY      = 160,
+  camZ      = -190;
   camera    = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
   camera.position.set(0, camY, camZ);
   
@@ -190,9 +190,9 @@ const setClouds = async () => {
 
     cloud.name = `cloud-${i}`
     cloud.position.set(
-      getRandom(-40, 40),
-      getRandom(camY - 20, camY - 40), 
-      getRandom(camZ + 20, camZ + 150)
+      getRandom(-15, 15),
+      getRandom(camY - 90, camY - 110), 
+      getRandom(camZ + 200, camZ + 320)
     );
 
     scene.add(cloud);
@@ -209,8 +209,8 @@ const animateClouds = () => {
   for(let i = 0; i < clouds.length; i++)
     clouds[i].position.x = 
     clouds[i].position.x < 0 
-      ? clouds[i].position.x - (clock.getElapsedTime() * 0.2) 
-      : clouds[i].position.x + (clock.getElapsedTime() * 0.2);
+      ? clouds[i].position.x - (clock.getElapsedTime() * 0.04) 
+      : clouds[i].position.x + (clock.getElapsedTime() * 0.04);
 
 }
 
