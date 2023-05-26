@@ -17,6 +17,8 @@ renderer,
 clock,
 raycaster,
 distance,
+flyingIn,
+clouds,
 movingCharDueToDistance,
 movingCharTimeout,
 currentPos,
@@ -52,8 +54,6 @@ activeTile,
 activeKeysPressed,
 statsPanel;
 
-let clouds = [];
-
 const setScene = async () => {
 
   sizes = {
@@ -65,9 +65,10 @@ const setScene = async () => {
   scene.background  = new THREE.Color(0xf5e6d3);
   scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
-  camY    = 90,
-  camZ    = -110;
-  camera  = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
+  flyingIn  = true;
+  camY      = 90,
+  camZ      = -110;
+  camera    = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 300);
   camera.position.set(0, camY, camZ);
   
   renderer = new THREE.WebGLRenderer({
@@ -146,19 +147,10 @@ const setRaycast = () => {
 
 }
 
-const animateClouds = () => {
-
-  for(let i = 0; i < clouds.length; i++)
-    clouds[i].position.x = 
-    clouds[i].position.x < 0 
-      ? clouds[i].position.x - (clock.getElapsedTime() * 0.2) 
-      : clouds[i].position.x + (clock.getElapsedTime() * 0.2);
-
-}
-
 const setClouds = async () => {
 
-  const amountOfClouds = 10;
+  clouds                = []
+  const amountOfClouds  = 10;
 
   const createClouds = async () => {
     
@@ -196,6 +188,7 @@ const setClouds = async () => {
       cloud.rotation.y = cloud.rotation.z = 0;
     }
 
+    cloud.name = `cloud-${i}`
     cloud.position.set(
       getRandom(-40, 40),
       getRandom(camY - 20, camY - 40), 
@@ -208,6 +201,29 @@ const setClouds = async () => {
   }
 
   return;
+
+}
+
+const animateClouds = () => {
+
+  for(let i = 0; i < clouds.length; i++)
+    clouds[i].position.x = 
+    clouds[i].position.x < 0 
+      ? clouds[i].position.x - (clock.getElapsedTime() * 0.2) 
+      : clouds[i].position.x + (clock.getElapsedTime() * 0.2);
+
+}
+
+const cleanUpClouds = () => {
+
+  flyingIn = false;
+
+  for(let i = 0; i < clouds.length; i++) {
+    const cloud = scene.getObjectByProperty('name', `cloud-${i}`);
+    cleanUp(cloud);
+  }
+
+  clouds = undefined;
 
 }
 
@@ -352,7 +368,7 @@ const createSurroundingTiles = (newActiveTile) => {
 
   setCenterTile(parsedCoords);
 
-  cleanUp();
+  cleanUpTiles();
 
   activeTile = newActiveTile;
 
@@ -527,7 +543,7 @@ const createTile = () => {
 
 }
 
-const cleanUp = () => {
+const cleanUpTiles = () => {
 
   for(let i = terrainTiles.length - 1; i >= 0; i--) {
 
@@ -547,13 +563,7 @@ const cleanUp = () => {
     ) {
 
       const tile = scene.getObjectsByProperty('name', terrainTiles[i].hex.name);
-
-      for(let o = 0; o < tile.length; o++) {
-        tile[o].geometry.dispose();
-        tile[o].material.dispose();
-        scene.remove(tile[o]);
-        renderer.renderLists.dispose();
-      }
+      for(let o = 0; o < tile.length; o++) cleanUp(tile[o]);
 
       terrainTiles.splice(i, 1);
 
@@ -679,6 +689,9 @@ const camUpdate = () => {
 
   if(camY > 7)    camY -= 0.5;
   if(camZ < -10)  camZ += 0.5;
+  else {
+    if(flyingIn) cleanUpClouds(); // This statement is called once when the fly in animation is compelte
+  }
 
 }
 
@@ -719,12 +732,32 @@ const showStats = () => {
   document.body.appendChild(statsPanel.dom);
 }
 
+const cleanUp = (obj) => {
+
+  if(obj.geometry && obj.material) {
+    obj.geometry.dispose();
+    obj.material.dispose();
+  }
+  else {
+    obj.traverse(el => {
+      if(el.isMesh) {
+        el.geometry.dispose();
+        el.material.dispose();
+      }
+    });
+  }
+
+  scene.remove(obj);
+  renderer.renderLists.dispose();
+
+}
+
 const render = () => {
 
   statsPanel.begin();
   determineMovement();
   calcCharPos();
-  animateClouds();
+  if(flyingIn) animateClouds();
   if(mixer) mixer.update(clock.getDelta());
   renderer.render(scene, camera);
   statsPanel.end();
