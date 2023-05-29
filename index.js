@@ -268,7 +268,7 @@ const setFog = () => {
     fogDepth *= mix(noiseSample, 1.0, saturate((fogDepth - 5000.0) / 5000.0));
     fogDepth *= fogDepth;
 
-    float heightFactor = 0.05;
+    float heightFactor = 0.001;
     float fogFactor = heightFactor * exp(-fogOrigin.y * fogDensity) * (
         1.0 - exp(-fogDepth * fogDirection.y * fogDensity)) / fogDirection.y;
     fogFactor = saturate(fogFactor);
@@ -291,6 +291,7 @@ const setFog = () => {
     
   THREE.ShaderChunk.fog_vertex = `
   #ifdef USE_FOG
+  vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
   #endif`;
     
@@ -299,7 +300,7 @@ const setFog = () => {
     varying vec3 vWorldPosition;
   #endif`;
 
-  scene.fog = new THREE.FogExp2(0xDFE9F3, 0.0000005);
+  scene.fog = new THREE.FogExp2(0xDFE9F3, 0.001);
   // scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
 }
