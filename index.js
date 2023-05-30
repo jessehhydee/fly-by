@@ -255,53 +255,134 @@ const setFog = () => {
   }
   `;
 
-  THREE.ShaderChunk.fog_fragment = `
-  #ifdef USE_FOG
-    vec3 fogOrigin = cameraPosition;
-    vec3 fogDirection = normalize(vWorldPosition - fogOrigin);
-    float fogDepth = distance(vWorldPosition, fogOrigin);
+  // THREE.ShaderChunk.fog_fragment = `
+  // #ifdef USE_FOG
+  //   vec3 fogOrigin = cameraPosition;
+  //   vec3 fogDirection = normalize(vWorldPosition - fogOrigin);
+  //   float fogDepth = distance(vWorldPosition, fogOrigin);
 
-    // f(p) = fbm( p + fbm( p ) )
-    vec3 noiseSampleCoord = vWorldPosition * 0.00025 + vec3(
-        0.0, 0.0, fogTime * 0.025);
-    float noiseSample = FBM(noiseSampleCoord + FBM(noiseSampleCoord)) * 0.5 + 0.5;
-    fogDepth *= mix(noiseSample, 1.0, saturate((fogDepth - 5000.0) / 5000.0));
-    fogDepth *= fogDepth;
+  //   // f(p) = fbm( p + fbm( p ) )
+  //   vec3 noiseSampleCoord = vWorldPosition * 0.00025 + vec3(
+  //       0.0, 0.0, fogTime * 0.025);
+  //   float noiseSample = FBM(noiseSampleCoord + FBM(noiseSampleCoord)) * 0.5 + 0.5;
+  //   fogDepth *= mix(noiseSample, 1.0, saturate((fogDepth - 5000.0) / 5000.0));
+  //   fogDepth *= fogDepth;
 
-    float heightFactor = 0.001;
-    float fogFactor = heightFactor * exp(-fogOrigin.y * fogDensity) * (
-        1.0 - exp(-fogDepth * fogDirection.y * fogDensity)) / fogDirection.y;
-    fogFactor = saturate(fogFactor);
+  //   float heightFactor = 0.001;
+  //   float fogFactor = heightFactor * exp(-fogOrigin.y * fogDensity) * (
+  //       1.0 - exp(-fogDepth * fogDirection.y * fogDensity)) / fogDirection.y;
+  //   fogFactor = saturate(fogFactor);
 
-    gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
-  #endif`;
+  //   gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+  // #endif`;
     
-  THREE.ShaderChunk.fog_pars_fragment = _NOISE_GLSL + `
-  #ifdef USE_FOG
-    uniform float fogTime;
-    uniform vec3 fogColor;
-    varying vec3 vWorldPosition;
-    #ifdef FOG_EXP2
-      uniform float fogDensity;
-    #else
-      uniform float fogNear;
-      uniform float fogFar;
-    #endif
-  #endif`;
+  // THREE.ShaderChunk.fog_pars_fragment = _NOISE_GLSL + `
+  // #ifdef USE_FOG
+  //   uniform float fogTime;
+  //   uniform vec3 fogColor;
+  //   varying vec3 vWorldPosition;
+  //   #ifdef FOG_EXP2
+  //     uniform float fogDensity;
+  //   #else
+  //     uniform float fogNear;
+  //     uniform float fogFar;
+  //   #endif
+  // #endif`;
     
-  THREE.ShaderChunk.fog_vertex = `
-  #ifdef USE_FOG
+  // THREE.ShaderChunk.fog_vertex = `
+  // #ifdef USE_FOG
+  // vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
+  //   vWorldPosition = worldPosition.xyz;
+  // #endif`;
+    
+  // THREE.ShaderChunk.fog_pars_vertex = `
+  // #ifdef USE_FOG
+  //   varying vec3 vWorldPosition;
+  // #endif`;
+
+  //  THREE.ShaderChunk.fog_fragment = `
+  // #ifdef USE_FOG
+	//   #ifdef FOG_EXP2
+  //     float heightFactor = 0.5;
+	// 	  float fogFactor = heightFactor * exp(vFogHeight * fogDensity) * (1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth ));
+  //     fogFactor = saturate(fogFactor);
+	//   #else
+  //     float heightFactor = 0.5;
+	// 	  float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );
+	//   #endif
+	//   gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+  // #endif
+  // `;
+    
+  // THREE.ShaderChunk.fog_pars_fragment = _NOISE_GLSL + `
+  // #ifdef USE_FOG
+	//   uniform vec3 fogColor;
+	//   varying float vFogDepth;
+	//   varying float vFogHeight;
+	//   #ifdef FOG_EXP2
+	// 	  uniform float fogDensity;
+	//   #else
+	// 	  uniform float fogNear;
+	// 	  uniform float fogFar;
+	//   #endif
+  // #endif
+  // `;
+    
+  // THREE.ShaderChunk.fog_vertex = `
+  // #ifdef USE_FOG
+	//   vFogDepth = - mvPosition.z;
+	//   vFogHeight = mvPosition.y;
+  // #endif
+  // `;
+    
+  // THREE.ShaderChunk.fog_pars_vertex = `
+  // #ifdef USE_FOG
+	//   varying float vFogDepth;
+	//   varying float vFogHeight;
+  // #endif
+  // `;
+
+  //https://woodenraft.games/blog/height-fog-implementation-three-js
+
+  THREE.ShaderChunk.fog_pars_vertex += `
+#ifdef USE_FOG
+  varying vec3 vWorldPosition;
+#endif
+`;
+
+THREE.ShaderChunk.fog_vertex += `
+#ifdef USE_FOG
   vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
-    vWorldPosition = worldPosition.xyz;
-  #endif`;
-    
-  THREE.ShaderChunk.fog_pars_vertex = `
-  #ifdef USE_FOG
-    varying vec3 vWorldPosition;
-  #endif`;
+  vWorldPosition = worldPosition.xyz;
+#endif
+`;
 
-  scene.fog = new THREE.FogExp2(0xDFE9F3, 0.001);
-  // scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
+// fragment shader
+THREE.ShaderChunk.fog_pars_fragment += `
+#ifdef USE_FOG
+  varying vec3 vWorldPosition;
+
+  float fogHeight = 2.0;
+#endif
+`;
+
+const FOG_APPLIED_LINE = 'gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );';
+THREE.ShaderChunk.fog_fragment = THREE.ShaderChunk.fog_fragment.replace(FOG_APPLIED_LINE, `
+  float fogFactor2 = smoothstep( fogHeight, 0.0, vWorldPosition.y );
+  float fogFactor3 = smoothstep( fogHeight, 0.0, cameraPosition.y );
+
+  fogFactor = fogFactor * max(fogFactor2, fogFactor3);
+
+  ${FOG_APPLIED_LINE}
+`);
+
+// THREE.ShaderLib.sprite.vertexShader = THREE.ShaderLib.sprite.vertexShader.replace('#include <fog_vertex>', `
+//   vec4 worldPosition = mvPosition;
+//   #include <fog_vertex>
+// `);
+
+  // scene.fog = new THREE.FogExp2(0xDFE9F3, 0.1);
+  scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
 
 }
 
