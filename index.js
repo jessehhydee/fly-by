@@ -345,44 +345,35 @@ const setFog = () => {
   //https://woodenraft.games/blog/height-fog-implementation-three-js
 
   THREE.ShaderChunk.fog_pars_vertex += `
-#ifdef USE_FOG
-  varying vec3 vWorldPosition;
-#endif
-`;
+  #ifdef USE_FOG
+    varying vec3 vWorldPosition;
+  #endif
+  `;
 
-THREE.ShaderChunk.fog_vertex += `
-#ifdef USE_FOG
-  vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
-  vWorldPosition = worldPosition.xyz;
-#endif
-`;
+  THREE.ShaderChunk.fog_vertex += `
+  #ifdef USE_FOG
+    vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
+    vWorldPosition = worldPosition.xyz;
+  #endif
+  `;
 
-// fragment shader
-THREE.ShaderChunk.fog_pars_fragment += `
-#ifdef USE_FOG
-  varying vec3 vWorldPosition;
+  THREE.ShaderChunk.fog_pars_fragment += `
+  #ifdef USE_FOG
+    varying vec3 vWorldPosition;
+    float fogHeight = 10.0;
+  #endif
+  `;
 
-  float fogHeight = 2.0;
-#endif
-`;
+  const FOG_APPLIED_LINE = 'gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );';
+  THREE.ShaderChunk.fog_fragment = THREE.ShaderChunk.fog_fragment.replace(FOG_APPLIED_LINE, `
+    float fogFactorHeight = smoothstep(fogHeight, 0.0, vWorldPosition.y);
+    // float fogFactorH = fogFactor * fogFactorHeight;
+    
+    gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactorHeight );
+    ${FOG_APPLIED_LINE}
+  `);
 
-const FOG_APPLIED_LINE = 'gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );';
-THREE.ShaderChunk.fog_fragment = THREE.ShaderChunk.fog_fragment.replace(FOG_APPLIED_LINE, `
-  float fogFactor2 = smoothstep( fogHeight, 0.0, vWorldPosition.y );
-  float fogFactor3 = smoothstep( fogHeight, 0.0, cameraPosition.y );
-
-  fogFactor = fogFactor * max(fogFactor2, fogFactor3);
-
-  ${FOG_APPLIED_LINE}
-`);
-
-// THREE.ShaderLib.sprite.vertexShader = THREE.ShaderLib.sprite.vertexShader.replace('#include <fog_vertex>', `
-//   vec4 worldPosition = mvPosition;
-//   #include <fog_vertex>
-// `);
-
-  // scene.fog = new THREE.FogExp2(0xDFE9F3, 0.1);
-  scene.fog         = new THREE.Fog(0xf5e6d3, 70, 110);
+  scene.fog = new THREE.Fog(0xf5e6d3, 70, 130);
 
 }
 
