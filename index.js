@@ -228,7 +228,7 @@ const setClouds = async () => {
 
     cloud.name = `cloud-${i}`
     cloud.position.set(
-      getRandom(-15, 15),
+      getRandom(-20, 20),
       getRandom(camY - 90, camY - 110), 
       getRandom(camZ + 200, camZ + 320)
     );
@@ -658,7 +658,7 @@ const determineMovement = () => {
     }
   }
   if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
-    if(character.position.y > 22) {
+    if(character.position.y > 27) {
       character.position.y -= charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
       if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
