@@ -25,6 +25,8 @@ currentPos,
 currentLookAt,
 thirdPerson,
 character,
+charPosYIncrement,
+charRotateYIncrement,
 mixer,
 charAnimation,
 gliding,
@@ -298,6 +300,9 @@ const setCharacter = async () => {
 
   character.position.set(0, 25, 0);
   character.scale.set(1.3, 1.3, 1.3);
+
+  charPosYIncrement     = 0;
+  charRotateYIncrement  = 0;
 
   mixer         = new THREE.AnimationMixer(character);
   charAnimation = mixer.clipAction(model.animations[0]);
@@ -645,27 +650,31 @@ const determineMovement = () => {
   character.translateZ(0.4);
 
   if(activeKeysPressed.includes(87)) { // w
-    if(character.position.y < 60) {
-      character.position.y += 0.3;
+    if(character.position.y < 90) {
+      character.position.y += charPosYIncrement;
+      if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
       if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
       if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
     }
   }
   if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
     if(character.position.y > 22) {
-      character.position.y -= 0.3;
+      character.position.y -= charPosYIncrement;
+      if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
       if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
       if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
     }
   }
 
   if(activeKeysPressed.includes(65)) { // a
-    character.rotateY(0.01);
+    character.rotateY(charRotateYIncrement);
+    if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
   }
   if(activeKeysPressed.includes(68)) { // d
-    character.rotateY(-0.01);
+    character.rotateY(-charRotateYIncrement);
+    if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
     if(charBody.rotation.y > -0.4) charBody.rotation.y -= 0.04;
   }
@@ -674,11 +683,14 @@ const determineMovement = () => {
 
   if(!activeKeysPressed.includes(87) && !activeKeysPressed.includes(83) ||
     activeKeysPressed.includes(87) && activeKeysPressed.includes(83)) {
-    if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) {
+    if(charPosYIncrement > 0) charPosYIncrement -= 0.02;
+    if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) { // reverting from going up
+      character.position.y += charPosYIncrement;
       charNeck.rotation.x += 0.06;
       charBody.rotation.x += 0.04;
     }
-    if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) {
+    if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) { // reverting from going down
+      character.position.y -= charPosYIncrement;
       charNeck.rotation.x -= 0.06;
       charBody.rotation.x -= 0.04;
     }
@@ -686,11 +698,14 @@ const determineMovement = () => {
 
   if(!activeKeysPressed.includes(65) && !activeKeysPressed.includes(68) ||
     activeKeysPressed.includes(65) && activeKeysPressed.includes(68)) {
-    if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) {
+    if(charRotateYIncrement > 0) charRotateYIncrement -= 0.0005;
+    if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) { // reverting from going left
+      character.rotateY(charRotateYIncrement);
       charNeck.rotation.y += 0.07;
       charBody.rotation.y -= 0.04;
     }
-    if(charNeck.rotation.y > 0 || charBody.rotation.y < 0) {
+    if(charNeck.rotation.y > 0 || charBody.rotation.y < 0) { // reverting from going right
+      character.rotateY(-charRotateYIncrement);
       charNeck.rotation.y -= 0.07;
       charBody.rotation.y += 0.04;
     }
