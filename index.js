@@ -313,7 +313,7 @@ const setCharacter = async () => {
   geo.computeBoundsTree();
   scene.add(character);
   
-  setCharAnimation();
+  setTimeout(() => setCharAnimation(), 6000); // wait for fly-in animation
 
   return;
 
