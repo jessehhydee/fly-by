@@ -85,43 +85,12 @@ const setScene = async () => {
   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
   gltfLoader = new GLTFLoader();
-  centerTile = {
-    xFrom:  -30,
-    xTo:    30,
-    yFrom:  -30,
-    yTo:    30
-  };
-  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
-  amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
-  simplex               = new SimplexNoise();
-  maxHeight             = 30;
-  snowHeight            = maxHeight * 0.9;
-  lightSnowHeight       = maxHeight * 0.8;
-  rockHeight            = maxHeight * 0.7;
-  forestHeight          = maxHeight * 0.45;
-  lightForestHeight     = maxHeight * 0.32;
-  grassHeight           = maxHeight * 0.22;
-  sandHeight            = maxHeight * 0.15;
-  shallowWaterHeight    = maxHeight * 0.1;
-  waterHeight           = maxHeight * 0.05;
-  deepWaterHeight       = maxHeight * 0;
-  textures              = {
-    snow:         new THREE.Color(0xE5E5E5),
-    lightSnow:    new THREE.Color(0x73918F),
-    rock:         new THREE.Color(0x2A2D10),
-    forest:       new THREE.Color(0x224005),
-    lightForest:  new THREE.Color(0x367308),
-    grass:        new THREE.Color(0x98BF06),
-    sand:         new THREE.Color(0xE3F272),
-    shallowWater: new THREE.Color(0x3EA9BF),
-    water:        new THREE.Color(0x00738B),
-    deepWater:    new THREE.Color(0x015373)
-  };
-  terrainTiles      = [];
+  
   activeKeysPressed = [];
 
   setFog();
   setRaycast();
+  setTerrainValues();
   await setClouds();
   await setCharacter();
   await setGrass();
@@ -169,7 +138,7 @@ const setFog = () => {
     ${FOG_APPLIED_LINE}
   `);
 
-  scene.fog = new THREE.Fog(0xf5e6d3, 70, 130);
+  scene.fog = new THREE.Fog(0xf5e6d3, 70, 115);
 
 }
 
@@ -184,6 +153,44 @@ const setRaycast = () => {
   movingCharDueToDistance = false;
   raycaster.firstHitOnly = true;
 
+}
+
+const setTerrainValues = () => {
+
+  centerTile = {
+    xFrom:  -30,
+    xTo:    30,
+    yFrom:  -30,
+    yTo:    30
+  };
+  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
+  amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
+  simplex               = new SimplexNoise();
+  maxHeight             = 30;
+  snowHeight            = maxHeight * 0.9;
+  lightSnowHeight       = maxHeight * 0.8;
+  rockHeight            = maxHeight * 0.7;
+  forestHeight          = maxHeight * 0.45;
+  lightForestHeight     = maxHeight * 0.32;
+  grassHeight           = maxHeight * 0.22;
+  sandHeight            = maxHeight * 0.15;
+  shallowWaterHeight    = maxHeight * 0.1;
+  waterHeight           = maxHeight * 0.05;
+  deepWaterHeight       = maxHeight * 0;
+  textures              = {
+    snow:         new THREE.Color(0xE5E5E5),
+    lightSnow:    new THREE.Color(0x73918F),
+    rock:         new THREE.Color(0x2A2D10),
+    forest:       new THREE.Color(0x224005),
+    lightForest:  new THREE.Color(0x367308),
+    grass:        new THREE.Color(0x98BF06),
+    sand:         new THREE.Color(0xE3F272),
+    shallowWater: new THREE.Color(0x3EA9BF),
+    water:        new THREE.Color(0x00738B),
+    deepWater:    new THREE.Color(0x015373)
+  };
+  terrainTiles      = [];
+  
 }
 
 const setClouds = async () => {
@@ -272,8 +279,9 @@ const setCharAnimation = () => {
   min = 3,
   max = 14;
 
-  const interval = () => {
+  const toggleAnimation = () => {
 
+    if(flyingIn) return;
     if(!gliding) 
       charAnimation
         .reset()
@@ -285,8 +293,15 @@ const setCharAnimation = () => {
     else charAnimation.fadeOut(2);
     gliding = !gliding;
 
+  };
+
+  const interval = () => {
+
+    toggleAnimation();
+
     const randomTime = Math.floor(Math.random() * (max - min + 1) + min);
     setTimeout(interval, randomTime * 1000);
+
   }
 
   interval();
@@ -314,7 +329,7 @@ const setCharacter = async () => {
   geo.computeBoundsTree();
   scene.add(character);
   
-  setTimeout(() => setCharAnimation(), 6000); // wait for fly-in animation
+  setCharAnimation();
 
   return;
 
