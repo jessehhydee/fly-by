@@ -23,6 +23,7 @@ movingCharDueToDistance,
 movingCharTimeout,
 currentPos,
 currentLookAt,
+lookAtPosZ,
 thirdPerson,
 character,
 charPosYIncrement,
@@ -376,6 +377,7 @@ const setTrees = async () => {
 const setCam = () => {
   currentPos    = new THREE.Vector3();
   currentLookAt = new THREE.Vector3();
+  lookAtPosZ    = 15;
   thirdPerson   = true;
 }
 
@@ -630,10 +632,8 @@ const resize = () => {
 
 const keyDown = (event) => {
 
-  if(event.keyCode === 81) {
+  if(event.keyCode === 81 & !flyingIn)
     thirdPerson ? thirdPerson = false : thirdPerson = true;
-    camUpdate();
-  }
 
   if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
@@ -716,17 +716,22 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 2);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 6);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, 15) : new THREE.Vector3(0, 0.5, 20);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, lookAtPosZ) : new THREE.Vector3(0, 0.5, lookAtPosZ + 6);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
+  }
+
+  if(!activeKeysPressed.length) {
+    if(character.position.y > 60 && lookAtPosZ > 5) lookAtPosZ -= 0.2;
+    if(character.position.y <= 60 && lookAtPosZ < 15) lookAtPosZ += 0.2;
   }
 
   const idealOffset = calcIdealOffset();
