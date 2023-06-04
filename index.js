@@ -33,6 +33,10 @@ charAnimation,
 gliding,
 charNeck,
 charBody,
+charWorldPosition,
+currentNearestDeg,
+degrees,
+orientationDegrees,
 gltfLoader,
 grassMeshes,
 treeMeshes,
@@ -85,43 +89,15 @@ const setScene = async () => {
   scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
   gltfLoader = new GLTFLoader();
-  centerTile = {
-    xFrom:  -30,
-    xTo:    30,
-    yFrom:  -30,
-    yTo:    30
-  };
-  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
-  amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
-  simplex               = new SimplexNoise();
-  maxHeight             = 30;
-  snowHeight            = maxHeight * 0.9;
-  lightSnowHeight       = maxHeight * 0.8;
-  rockHeight            = maxHeight * 0.7;
-  forestHeight          = maxHeight * 0.45;
-  lightForestHeight     = maxHeight * 0.32;
-  grassHeight           = maxHeight * 0.22;
-  sandHeight            = maxHeight * 0.15;
-  shallowWaterHeight    = maxHeight * 0.1;
-  waterHeight           = maxHeight * 0.05;
-  deepWaterHeight       = maxHeight * 0;
-  textures              = {
-    snow:         new THREE.Color(0xE5E5E5),
-    lightSnow:    new THREE.Color(0x73918F),
-    rock:         new THREE.Color(0x2A2D10),
-    forest:       new THREE.Color(0x224005),
-    lightForest:  new THREE.Color(0x367308),
-    grass:        new THREE.Color(0x98BF06),
-    sand:         new THREE.Color(0xE3F272),
-    shallowWater: new THREE.Color(0x3EA9BF),
-    water:        new THREE.Color(0x00738B),
-    deepWater:    new THREE.Color(0x015373)
-  };
-  terrainTiles      = [];
-  activeKeysPressed = [];
+  
+  charWorldPosition   = new THREE.Vector3();
+  degrees             = [360, 315, 270, 225, 180, 135, 90, 45, 0];
+  orientationDegrees  = [0, 315, 270, 225, 180, 135, 90, 45];
+  activeKeysPressed   = [];
 
   setFog();
   setRaycast();
+  setTerrainValues();
   await setClouds();
   await setCharacter();
   await setGrass();
@@ -169,7 +145,7 @@ const setFog = () => {
     ${FOG_APPLIED_LINE}
   `);
 
-  scene.fog = new THREE.Fog(0xf5e6d3, 70, 130);
+  // scene.fog = new THREE.Fog(0xf5e6d3, 70, 130);
 
 }
 
@@ -184,6 +160,44 @@ const setRaycast = () => {
   movingCharDueToDistance = false;
   raycaster.firstHitOnly = true;
 
+}
+
+const setTerrainValues = () => {
+
+  centerTile = {
+    xFrom:  -30,
+    xTo:    30,
+    yFrom:  -30,
+    yTo:    30
+  };
+  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
+  amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
+  simplex               = new SimplexNoise();
+  maxHeight             = 30;
+  snowHeight            = maxHeight * 0.9;
+  lightSnowHeight       = maxHeight * 0.8;
+  rockHeight            = maxHeight * 0.7;
+  forestHeight          = maxHeight * 0.45;
+  lightForestHeight     = maxHeight * 0.32;
+  grassHeight           = maxHeight * 0.22;
+  sandHeight            = maxHeight * 0.15;
+  shallowWaterHeight    = maxHeight * 0.1;
+  waterHeight           = maxHeight * 0.05;
+  deepWaterHeight       = maxHeight * 0;
+  textures              = {
+    snow:         new THREE.Color(0xE5E5E5),
+    lightSnow:    new THREE.Color(0x73918F),
+    rock:         new THREE.Color(0x2A2D10),
+    forest:       new THREE.Color(0x224005),
+    lightForest:  new THREE.Color(0x367308),
+    grass:        new THREE.Color(0x98BF06),
+    sand:         new THREE.Color(0xE3F272),
+    shallowWater: new THREE.Color(0x3EA9BF),
+    water:        new THREE.Color(0x00738B),
+    deepWater:    new THREE.Color(0x015373)
+  };
+  terrainTiles      = [];
+  
 }
 
 const setClouds = async () => {
@@ -272,8 +286,9 @@ const setCharAnimation = () => {
   min = 3,
   max = 14;
 
-  const interval = () => {
+  const toggleAnimation = () => {
 
+    if(flyingIn) return;
     if(!gliding) 
       charAnimation
         .reset()
@@ -285,8 +300,15 @@ const setCharAnimation = () => {
     else charAnimation.fadeOut(2);
     gliding = !gliding;
 
+  };
+
+  const interval = () => {
+
+    toggleAnimation();
+
     const randomTime = Math.floor(Math.random() * (max - min + 1) + min);
     setTimeout(interval, randomTime * 1000);
+
   }
 
   interval();
@@ -314,7 +336,7 @@ const setCharacter = async () => {
   geo.computeBoundsTree();
   scene.add(character);
   
-  setTimeout(() => setCharAnimation(), 6000); // wait for fly-in animation
+  setCharAnimation();
 
   return;
 
@@ -381,61 +403,129 @@ const setCam = () => {
   thirdPerson   = true;
 }
 
+const charactersOrientation = () => {
+
+  const radToDeg = (radians) => {
+    let deg = radians * (180 / Math.PI);
+    if(deg < 0) deg = 360 - Math.abs(deg);
+    return deg;
+  }
+
+  const dir         = character.getWorldDirection(charWorldPosition);
+  const angleRad    = Math.atan2(dir.x, dir.z); 
+  const angleDeg    = radToDeg(angleRad);
+  let   nearestDeg  = degrees.reduce((prev, curr) => {
+    return (Math.abs(curr - angleDeg) < Math.abs(prev - angleDeg) ? curr : prev);
+  });
+  
+  if(nearestDeg === 360) nearestDeg = 0;
+
+  return nearestDeg;
+
+}
+
+const tilesToCreate = (charOrientation) => {
+
+  let   tiles                 = [];
+  let   beginningIndex        = -2;
+  const amountOfTilesToCreate = 5;
+  const charOrientationIndex  = orientationDegrees.findIndex(el => el === charOrientation);
+
+  for(let i = 0; i < amountOfTilesToCreate; i++) {
+
+    let index = charOrientationIndex + beginningIndex;
+    if(index < 0) index = orientationDegrees.length - Math.abs(index);
+    if(index > orientationDegrees.length - 1) index = index - orientationDegrees.length;
+
+    tiles.push(orientationDegrees[index]);
+
+    beginningIndex++;
+
+  }
+
+  return tiles;
+
+}
+
 const createSurroundingTiles = (newActiveTile) => {
 
-  const setCenterTile = (parsedCoords) => {
+  let   activeTiles     = [];
+  const charOrientation = charactersOrientation();
+  const tiles           = tilesToCreate(charOrientation);
+  
+  const setCenterTile = (parsedCoords, pushCenterTileToActive = false) => {
     centerTile = {
       xFrom:  parsedCoords.x,
       xTo:    parsedCoords.x + tileWidth,
       yFrom:  parsedCoords.y,
       yTo:    parsedCoords.y + tileWidth
     }
+    
+    if(pushCenterTileToActive) activeTiles.push(JSON.stringify({
+      x: centerTile.xFrom,
+      y: centerTile.yFrom
+    }))
   }
 
   const parsedCoords = JSON.parse(newActiveTile);
 
   setCenterTile(parsedCoords);
 
-  tileYNegative();
+  activeTiles.push(tileYPositive(tiles.some(el => el === orientationDegrees[0])));
 
-  tileXPositive();
+  activeTiles.push(tileXNegative(tiles.some(el => el === orientationDegrees[1])));
 
-  tileYPositive();
-  tileYPositive();
+  activeTiles.push(tileYNegative(tiles.some(el => el === orientationDegrees[2])));
+  activeTiles.push(tileYNegative(tiles.some(el => el === orientationDegrees[3])));
 
-  tileXNegative();
-  tileXNegative();
+  activeTiles.push(tileXPositive(tiles.some(el => el === orientationDegrees[4])));
+  activeTiles.push(tileXPositive(tiles.some(el => el === orientationDegrees[5])));
 
-  tileYNegative();
-  tileYNegative();
+  activeTiles.push(tileYPositive(tiles.some(el => el === orientationDegrees[6])));
+  activeTiles.push(tileYPositive(tiles.some(el => el === orientationDegrees[7])));
 
-  setCenterTile(parsedCoords);
+  setCenterTile(parsedCoords, true);
 
-  cleanUpTiles();
+  cleanUpTiles(activeTiles.filter(el => el));
 
   activeTile = newActiveTile;
 
 }
 
-const tileYNegative = () => {
-  centerTile.yFrom -= tileWidth;
-  centerTile.yTo -= tileWidth;
-  createTile();
+/**
+ * @param {*} orientation - in degrees
+ */
+const tileYPositive = (creatingTile) => {
+  centerTile.yFrom  += tileWidth;
+  centerTile.yTo    += tileWidth;
+  
+  let tileName;
+  if(creatingTile) tileName = createTile();
+  return tileName;
 }
-const tileYPositive = () => {
-  centerTile.yFrom += tileWidth;
-  centerTile.yTo += tileWidth;
-  createTile();
+const tileYNegative = (creatingTile) => {
+  centerTile.yFrom  -= tileWidth;
+  centerTile.yTo    -= tileWidth;
+
+  let tileName;
+  if(creatingTile) tileName = createTile();
+  return tileName;
 }
-const tileXNegative = () => {
-  centerTile.xFrom -= tileWidth;
-  centerTile.xTo -= tileWidth;
-  createTile();
+const tileXPositive = (creatingTile) => {
+  centerTile.xFrom  += tileWidth;
+  centerTile.xTo    += tileWidth;
+  
+  let tileName;
+  if(creatingTile) tileName = createTile();
+  return tileName;
 }
-const tileXPositive = () => {
-  centerTile.xFrom += tileWidth;
-  centerTile.xTo += tileWidth;
-  createTile();
+const tileXNegative = (creatingTile) => {
+  centerTile.xFrom  -= tileWidth;
+  centerTile.xTo    -= tileWidth;
+  
+  let tileName;
+  if(creatingTile) tileName = createTile();
+  return tileName;
 }
 
 const createTile = () => {
@@ -445,7 +535,7 @@ const createTile = () => {
     y: centerTile.yFrom
   });
 
-  if(terrainTiles.some(el => el.name === tileName)) return; // Returns if tile already exists
+  if(terrainTiles.some(el => el.name === tileName)) return tileName; // Returns if tile already exists
 
   const tileToPosition = (tileX, height, tileY) => {
     return new THREE.Vector3((tileX + (tileY % 2) * 0.5) * 1.68, height / 2, tileY * 1.535);
@@ -584,26 +674,15 @@ const createTile = () => {
 
   scene.add(hex, grassOne, grassTwo, treeOne, treeTwo);
 
+  return tileName;
+
 }
 
-const cleanUpTiles = () => {
+const cleanUpTiles = (activeTiles) => {
 
   for(let i = terrainTiles.length - 1; i >= 0; i--) {
 
-    let tileCoords  = JSON.parse(terrainTiles[i].hex.name);
-    tileCoords      = {
-      xFrom:  tileCoords.x,
-      xTo:    tileCoords.x + tileWidth,
-      yFrom:  tileCoords.y,
-      yTo:    tileCoords.y + tileWidth
-    }
-
-    if(
-      tileCoords.xFrom < centerTile.xFrom - tileWidth ||
-      tileCoords.xTo > centerTile.xTo + tileWidth ||
-      tileCoords.yFrom < centerTile.yFrom - tileWidth ||
-      tileCoords.yTo > centerTile.yTo + tileWidth
-    ) {
+    if(!activeTiles.some(el => el === terrainTiles[i].hex.name)) {
 
       const tile = scene.getObjectsByProperty('name', terrainTiles[i].hex.name);
       for(let o = 0; o < tile.length; o++) cleanUp(tile[o]);
@@ -645,12 +724,22 @@ const keyUp = (event) => {
   activeKeysPressed.splice(index, 1);
 }
 
+const orientationUpdated = () => {
+
+  const nearestDeg = charactersOrientation();
+  if(nearestDeg === currentNearestDeg) return;
+
+  createSurroundingTiles(activeTile);
+  currentNearestDeg = nearestDeg;
+
+}
+
 const determineMovement = () => {
 
   character.translateZ(0.4);
 
   if(activeKeysPressed.includes(87)) { // w
-    if(character.position.y < 90) {
+    if(character.position.y < 60) {
       character.position.y += charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
       if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
@@ -671,12 +760,14 @@ const determineMovement = () => {
     if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
+    orientationUpdated();
   }
   if(activeKeysPressed.includes(68)) { // d
     character.rotateY(-charRotateYIncrement);
     if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
     if(charBody.rotation.y > -0.4) charBody.rotation.y -= 0.04;
+    orientationUpdated();
   }
 
   // Revert
@@ -731,7 +822,7 @@ const camUpdate = () => {
 
   if(!activeKeysPressed.length) {
     if(character.position.y > 60 && lookAtPosZ > 5) lookAtPosZ -= 0.2;
-    if(character.position.y <= 60 && lookAtPosZ < 15) lookAtPosZ += 0.2;
+    if(character.position.y <= 60 && lookAtPosZ < 25) lookAtPosZ += 0.2;
   }
 
   const idealOffset = calcIdealOffset();
