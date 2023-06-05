@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
 import * as stats from 'https://cdn.skypack.dev/three-stats';
+import { Howl } from 'https://cdn.jsdelivr.net/npm/howler@2.2.3/+esm'
 
 const container = document.querySelector('.container');
 const canvas    = document.querySelector('.canvas');
@@ -205,8 +206,8 @@ const setClouds = async () => {
     
     const cloudModels     = [];
     const cloudModelPaths = [
-      'img/clouds/cloud-one/scene.gltf',
-      'img/clouds/cloud-two/scene.gltf'
+      'assets/clouds/cloud-one/scene.gltf',
+      'assets/clouds/cloud-two/scene.gltf'
     ];
   
     for(let i = 0; i < cloudModelPaths.length; i++)
@@ -266,6 +267,7 @@ const animateClouds = () => {
 const cleanUpClouds = () => {
 
   flyingIn = false;
+  playMusic();
 
   for(let i = 0; i < clouds.length; i++) {
     const cloud = scene.getObjectByProperty('name', `cloud-${i}`);
@@ -315,7 +317,7 @@ const setCharAnimation = () => {
 
 const setCharacter = async () => {
 
-  const model = await gltfLoader.loadAsync('img/bird/scene.gltf');
+  const model = await gltfLoader.loadAsync('assets/bird/scene.gltf');
   const geo   = model.scene.getObjectByName('Cube001_0').geometry.clone();
   character   = model.scene;
 
@@ -344,7 +346,7 @@ const setCharacter = async () => {
 const setGrass = async () => {
 
   grassMeshes           = {};
-  const model           = await gltfLoader.loadAsync('img/grass/scene.gltf');
+  const model           = await gltfLoader.loadAsync('assets/grass/scene.gltf');
   const grassMeshNames  = [
     {
       varName:  'grassMeshOne',
@@ -373,12 +375,12 @@ const setTrees = async () => {
   const treeMeshNames = [
     {
       varName:    'treeMeshOne',
-      modelPath:  'img/trees/pine/scene.gltf',
+      modelPath:  'assets/trees/pine/scene.gltf',
       meshName:   'Object_4'
     },
     {
       varName:    'treeMeshTwo',
-      modelPath:  'img/trees/twisted-branches/scene.gltf',
+      modelPath:  'assets/trees/twisted-branches/scene.gltf',
       meshName:   'Tree_winding_01_Material_0'
     }
   ];
@@ -847,6 +849,19 @@ const render = () => {
   statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
+
+}
+
+const playMusic = () => {
+
+  const sound = new Howl({
+    src: ['assets/sound/bg-music.mp3'],
+    autoplay: true,
+    loop: true,
+    volume: 0.01,
+  });
+
+  sound.play();
 
 }
 
