@@ -10,6 +10,55 @@ html, body {
   overflow: hidden;
 }
 
+.hex-container {
+  position: relative;
+  background-color: #f5e6d3;
+  padding: 50px;
+}
+
+.hex {
+  position: absolute;
+  margin: 1em auto;
+  width: 20px;
+  height: 34px;
+  border-radius: 4px/2px;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.hex:before,
+.hex:after {
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  background: inherit;
+  content: '';
+}
+ 
+.hex:before {
+  transform: rotate(60deg);
+}
+
+.hex:after {
+  transform: rotate(-60deg);
+}
+
+.hex-one {
+  background: #98BF06;
+  z-index: 2;
+}
+.hex-one:hover + .hex-two {
+  transform: rotate(-20deg);
+}
+
+.hex-two {
+  background: #367308;
+  z-index: 1;
+  transform-origin: bottom right;
+  transform: rotate(-14deg);
+}
+
 .container {
   width: calc(100vw - 15px);
   height: calc(100vh - 15px);

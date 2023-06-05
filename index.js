@@ -59,6 +59,8 @@ textures,
 terrainTiles,
 activeTile,
 activeKeysPressed,
+bgMusic,
+muteBgMusic,
 statsPanel;
 
 const setScene = async () => {
@@ -91,6 +93,7 @@ const setScene = async () => {
   gltfLoader = new GLTFLoader();
   
   activeKeysPressed = [];
+  muteBgMusic       = true;
 
   setFog();
   setRaycast();
@@ -398,11 +401,13 @@ const setTrees = async () => {
 }
 
 const setCam = () => {
+
   currentPos    = new THREE.Vector3();
   currentLookAt = new THREE.Vector3();
   lookAtPosZ    = 15;
   thirdPerson   = true;
   doubleSpeed   = false;
+
 }
 
 const createSurroundingTiles = (newActiveTile) => {
@@ -442,24 +447,35 @@ const createSurroundingTiles = (newActiveTile) => {
 }
 
 const tileYNegative = () => {
+
   centerTile.yFrom -= tileWidth;
   centerTile.yTo -= tileWidth;
   createTile();
+
 }
+
 const tileYPositive = () => {
+
   centerTile.yFrom += tileWidth;
   centerTile.yTo += tileWidth;
   createTile();
+
 }
+
 const tileXNegative = () => {
+
   centerTile.xFrom -= tileWidth;
   centerTile.xTo -= tileWidth;
   createTile();
+
 }
+
 const tileXPositive = () => {
+
   centerTile.xFrom += tileWidth;
   centerTile.xTo += tileWidth;
   createTile();
+
 }
 
 const createTile = () => {
@@ -671,8 +687,10 @@ const keyDown = (event) => {
 }
 
 const keyUp = (event) => {
+
   const index = activeKeysPressed.indexOf(event.keyCode);
   activeKeysPressed.splice(index, 1);
+
 }
 
 const determineMovement = () => {
@@ -807,15 +825,19 @@ const calcCharPos = () => {
 }
 
 const listenTo = () => {
+
   window.addEventListener('resize', resize.bind(this));
   window.addEventListener('keydown', keyDown.bind(this));
   window.addEventListener('keyup', keyUp.bind(this));
+
 }
 
 const showStats = () => {
+
   statsPanel = new stats.Stats();
   statsPanel.showPanel(0);
   document.body.appendChild(statsPanel.dom);
+  
 }
 
 const cleanUp = (obj) => {
@@ -854,15 +876,22 @@ const render = () => {
 
 const playMusic = () => {
 
-  const sound = new Howl({
+  bgMusic = new Howl({
     src: ['assets/sound/bg-music.mp3'],
     autoplay: true,
     loop: true,
     volume: 0.01,
   });
 
-  sound.play();
+  bgMusic.play();
 
 }
+
+const updateMusicVolume = () => {
+
+  muteBgMusic = !muteBgMusic;
+  bgMusic.volume(muteBgMusic ? 0 : 1);
+
+};
 
 setScene();
