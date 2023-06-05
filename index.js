@@ -25,12 +25,15 @@ currentPos,
 currentLookAt,
 lookAtPosZ,
 thirdPerson,
+doubleSpeed,
 character,
 charPosYIncrement,
 charRotateYIncrement,
+charRotateYMax,
 mixer,
 charAnimation,
 gliding,
+charAnimationTimeout,
 charNeck,
 charBody,
 gltfLoader,
@@ -279,13 +282,15 @@ const setCharAnimation = () => {
   min = 3,
   max = 14;
 
+  if(charAnimationTimeout) clearTimeout(charAnimationTimeout);
+
   const toggleAnimation = () => {
 
     if(flyingIn) return;
     if(!gliding) 
       charAnimation
         .reset()
-        .setEffectiveTimeScale(1)
+        .setEffectiveTimeScale(doubleSpeed ? 2 : 1)
         .setEffectiveWeight(1)
         .setLoop(THREE.LoopRepeat)
         .fadeIn(1)
@@ -299,8 +304,8 @@ const setCharAnimation = () => {
 
     toggleAnimation();
 
-    const randomTime = Math.floor(Math.random() * (max - min + 1) + min);
-    setTimeout(interval, randomTime * 1000);
+    const randomTime      = Math.floor(Math.random() * (max - min + 1) + min);
+    charAnimationTimeout  = setTimeout(interval, randomTime * 1000);
 
   }
 
@@ -319,6 +324,7 @@ const setCharacter = async () => {
 
   charPosYIncrement     = 0;
   charRotateYIncrement  = 0;
+  charRotateYMax        = 0.01;
 
   mixer         = new THREE.AnimationMixer(character);
   charAnimation = mixer.clipAction(model.animations[0]);
@@ -394,6 +400,7 @@ const setCam = () => {
   currentLookAt = new THREE.Vector3();
   lookAtPosZ    = 15;
   thirdPerson   = true;
+  doubleSpeed   = false;
 }
 
 const createSurroundingTiles = (newActiveTile) => {
@@ -650,6 +657,12 @@ const keyDown = (event) => {
   if(event.keyCode === 81 & !flyingIn)
     thirdPerson ? thirdPerson = false : thirdPerson = true;
 
+  if(event.keyCode === 32 & !flyingIn) {
+    doubleSpeed ? doubleSpeed = false : doubleSpeed = true;
+    doubleSpeed ? charRotateYMax = 0.02 : charRotateYMax = 0.01;
+    setCharAnimation();
+  }
+
   if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
     
@@ -662,9 +675,9 @@ const keyUp = (event) => {
 
 const determineMovement = () => {
 
-  character.translateZ(0.4);
+  character.translateZ(doubleSpeed ? 1 : 0.4);
 
-  if(activeKeysPressed.includes(87)) { // w
+  if(activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) { // w or up arrow
     if(character.position.y < 90) {
       character.position.y += charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -672,7 +685,7 @@ const determineMovement = () => {
       if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
     }
   }
-  if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
+  if((activeKeysPressed.includes(83) || activeKeysPressed.includes(40)) && !movingCharDueToDistance) { // s or down arrow
     if(character.position.y > 27) {
       character.position.y -= charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -681,23 +694,23 @@ const determineMovement = () => {
     }
   }
 
-  if(activeKeysPressed.includes(65)) { // a
+  if(activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) { // a or left arrow
     character.rotateY(charRotateYIncrement);
-    if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
+    if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
   }
-  if(activeKeysPressed.includes(68)) { // d
+  if(activeKeysPressed.includes(68) || activeKeysPressed.includes(39)) { // d or right arrow
     character.rotateY(-charRotateYIncrement);
-    if(charRotateYIncrement < 0.01) charRotateYIncrement += 0.0005;
+    if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
     if(charBody.rotation.y > -0.4) charBody.rotation.y -= 0.04;
   }
 
   // Revert
 
-  if(!activeKeysPressed.includes(87) && !activeKeysPressed.includes(83) ||
-    activeKeysPressed.includes(87) && activeKeysPressed.includes(83)) {
+  if((!activeKeysPressed.includes(87) && !activeKeysPressed.includes(38)) && (!activeKeysPressed.includes(83) && !activeKeysPressed.includes(40)) ||
+    (activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) && (activeKeysPressed.includes(83) || activeKeysPressed.includes(40))) {
     if(charPosYIncrement > 0) charPosYIncrement -= 0.02;
     if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) { // reverting from going up
       character.position.y += charPosYIncrement;
@@ -711,8 +724,8 @@ const determineMovement = () => {
     }
   }
 
-  if(!activeKeysPressed.includes(65) && !activeKeysPressed.includes(68) ||
-    activeKeysPressed.includes(65) && activeKeysPressed.includes(68)) {
+  if((!activeKeysPressed.includes(65) && !activeKeysPressed.includes(37)) && (!activeKeysPressed.includes(68) && !activeKeysPressed.includes(39)) ||
+    (activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) && (activeKeysPressed.includes(68) || activeKeysPressed.includes(39))) {
     if(charRotateYIncrement > 0) charRotateYIncrement -= 0.0005;
     if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) { // reverting from going left
       character.rotateY(charRotateYIncrement);
@@ -776,7 +789,7 @@ const calcCharPos = () => {
 
   if (intersects[0].distance < distance) {
     movingCharDueToDistance = true;
-    character.position.y += 0.1;
+    character.position.y += doubleSpeed ? 0.2 : 0.1;
   }
   else {
     if(movingCharDueToDistance && !movingCharTimeout) {
