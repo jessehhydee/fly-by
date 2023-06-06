@@ -32,24 +32,28 @@ html, body {
   z-index: 10;
 }
 .hex-music {
-  top: 50px;
-  right: 30px;
-  animation: slideInRight 1s ease-in;
-  animation-delay: 8s;
+  top: 40px;
+  right: 50px;
+  animation: slideInLeft 7s ease-in;
 }
 .hex-info {
   top: 100px;
-  right: 30px;
-  animation: slideInRight 1s ease-in;
-  animation-delay: 8s;
+  right: 50px;
+  animation: slideInLeft 7.05s ease-in;
 }
 
 @keyframes slideInLeft {
   0% {
-    transform: translateX(100%);
+    opacity: 0;
+    right: -20px;
+  }
+  95% {
+    opacity: 0;
+    right: -20px;
   }
   100% {
-    transform: translateX(0);
+    opacity: 1;
+    right: 50px;
   }
 }
 
@@ -83,7 +87,7 @@ html, body {
   z-index: 2;
 }
 .hex-one:hover + .hex-two {
-  transform: rotate(-20deg);
+  transform: rotate(-25deg);
 }
 
 .hex-two {
