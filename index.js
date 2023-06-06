@@ -833,6 +833,8 @@ const listenTo = () => {
   window.addEventListener('resize', resize.bind(this));
   window.addEventListener('keydown', keyDown.bind(this));
   window.addEventListener('keyup', keyUp.bind(this));
+  document.querySelector('.hex-music')
+    .addEventListener('click', () => updateMusicVolume());
 
 }
 
@@ -886,7 +888,7 @@ const playMusic = () => {
     src: ['assets/sound/bg-music.mp3'],
     autoplay: true,
     loop: true,
-    volume: 0.01,
+    volume: 0,
   });
 
   bgMusic.play();
@@ -894,9 +896,14 @@ const playMusic = () => {
 }
 
 const updateMusicVolume = () => {
-
+  
   muteBgMusic = !muteBgMusic;
-  bgMusic.volume(muteBgMusic ? 0 : 1);
+  bgMusic.volume(muteBgMusic ? 0 : 0.01);
+
+  document.querySelector('.sound-icon').src = 
+    muteBgMusic ? 
+    'assets/icons/sound-off.svg' :
+    'assets/icons/sound-on.svg'
 
 };
 

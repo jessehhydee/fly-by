@@ -178,6 +178,16 @@ html, body {
   }
 }
 
+.sound-icon {
+  position: absolute;
+  z-index: 11;
+  top: 23px;
+  left: 0px;
+  width: 20px;
+  height: auto;
+  pointer-events: none;
+}
+
 .hex {
   position: absolute;
   margin: 1em auto;
