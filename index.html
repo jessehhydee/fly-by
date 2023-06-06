@@ -12,6 +12,7 @@
     
     <link rel="stylesheet" type="text/css" href="index.css">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js" integrity="sha512-cOH8ndwGgPo+K7pTvMrqYbmI8u8k6Sho3js0gOqVWTmQMlLIi6TbqGWRTpf1ga8ci9H3iPsvDLr4X7xwhC/+DQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
       {
@@ -27,6 +28,23 @@
 
   <body class="fullscreen">
 
+    <div class="page-loader">
+      <div class="loader-container">
+        <div class="base">
+          <span class="loader-hex-edge h6"></span>
+          <span class="loader-hex-edge h3"></span>
+        </div>
+        <div class="base base-two">
+          <span class="loader-hex-edge h1"></span>
+          <span class="loader-hex-edge h4"></span>
+        </div>
+        <div class="base base-three">
+          <span class="loader-hex-edge h5"></span>
+          <span class="loader-hex-edge h2"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="fullscreen container">
       <canvas class="fullscreen canvas"></canvas>
     </div>
@@ -41,7 +59,7 @@
       <div class="hex hex-two"></div>
     </div>
 
-    <script src="index.js" type="module"></script> 
+    <script src="index.js" type="module"></script>
 
   </body>
 

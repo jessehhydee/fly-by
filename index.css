@@ -11,6 +11,119 @@ html, body {
   overflow: hidden;
 }
 
+
+
+/* Page Loader */
+
+.page-loader {
+  width: calc(100vw - 15px);
+  height: calc(100vh - 15px);
+  background-color: #f5e6d3;
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-container {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.base {
+  position: absolute;
+  width: 90px;
+  height: 51px;
+}
+.base-two {
+  transform: rotate(60deg)
+}
+.base-three {
+  transform: rotate(-60deg)
+}
+
+.loader-hex-edge {
+  position: absolute;
+  width: 4px;
+  height: 0%;
+  background: #00738B;
+  z-index: 101;
+}
+
+.h1 {
+  left: 0;
+  animation: AniOne 7.2s ease infinite;
+}
+.h2 {
+  right: 0;
+  animation: AniTwo 7.2s ease .6s infinite;
+}
+.h3 {
+  right: 0;
+  animation: AniTwo 7.2s ease 1.2s infinite;
+}
+.h4 {
+  right: 0;
+  animation: AniTwo 7.2s ease 1.8s infinite;
+}
+.h5 {
+  left: 0;
+  animation: AniOne 7.2s ease 2.4s infinite;
+}
+.h6 {
+  left: 0;
+  animation: AniOne 7.2s ease 3s infinite;
+}
+
+@keyframes AniOne {
+  0% {
+    bottom: 0;
+    height: 0;
+  }
+  6.944444444% {
+    bottom: 0;
+    height: 100%;
+  }
+  50% {
+    top: 0;
+    height: 100%;
+  }
+  59.944444433% {
+    top: 0;
+    height: 0;
+  }
+}
+@keyframes AniTwo {
+  0% {
+    top: 0;
+    height: 0;
+  }
+  6.944444444% {
+    top: 0;
+    height: 100%;
+  }
+  50% {
+    bottom: 0;
+    height: 100%;
+  }
+  59.944444433% {
+    bottom: 0;
+    height: 0;
+  }
+}
+
+
+
+/* Canvas */
+
 .container {
   width: calc(100vw - 15px);
   height: calc(100vh - 15px);
@@ -25,6 +138,14 @@ html, body {
   border-radius: 10px;
 }
 
+
+
+/* Icons */
+
+.js-loading {
+  animation-play-state: paused !important;
+}
+
 .hex-container {
   width: fit-content;
   height: fit-content;
@@ -34,12 +155,12 @@ html, body {
 .hex-music {
   top: 40px;
   right: 50px;
-  animation: slideInLeft 7s ease-in;
+  animation: slideInLeft 8s ease-in;
 }
 .hex-info {
   top: 100px;
   right: 50px;
-  animation: slideInLeft 7.05s ease-in;
+  animation: slideInLeft 8.05s ease-in;
 }
 
 @keyframes slideInLeft {

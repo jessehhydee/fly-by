@@ -59,9 +59,10 @@ textures,
 terrainTiles,
 activeTile,
 activeKeysPressed,
+statsPanel,
 bgMusic,
 muteBgMusic,
-statsPanel;
+loadingDismissed;
 
 const setScene = async () => {
 
@@ -110,6 +111,9 @@ const setScene = async () => {
   listenTo();
   showStats();
   render();
+
+  pauseIconAnimation();
+  checkLoadingPage();
 
 }
 
@@ -863,10 +867,12 @@ const cleanUp = (obj) => {
 const render = () => {
 
   statsPanel.begin();
-  determineMovement();
-  calcCharPos();
-  if(flyingIn) animateClouds();
-  if(mixer) mixer.update(clock.getDelta());
+  if(loadingDismissed) {
+    determineMovement();
+    calcCharPos();
+    if(flyingIn) animateClouds();
+    if(mixer) mixer.update(clock.getDelta());
+  }
   renderer.render(scene, camera);
   statsPanel.end();
 
@@ -893,5 +899,67 @@ const updateMusicVolume = () => {
   bgMusic.volume(muteBgMusic ? 0 : 1);
 
 };
+
+const pauseIconAnimation = (pause = true) => {
+
+  if(pause) {
+    document.querySelector('.hex-music').classList.add('js-loading');
+    document.querySelector('.hex-info').classList.add('js-loading');
+    return;
+  }
+
+  document.querySelector('.hex-music').classList.remove('js-loading');
+  document.querySelector('.hex-info').classList.remove('js-loading');
+
+}
+
+const checkLoadingPage = () => {
+
+  let loadingCounter  = 0;
+  loadingDismissed    = false;
+
+  const checkAssets = () => {
+
+    let allAssetsLoaded = true;
+
+    if(!scene)                                  allAssetsLoaded = false;
+    if(!clouds.length === 2)                    allAssetsLoaded = false;
+    if(!character)                              allAssetsLoaded = false;
+    if(!Object.keys(grassMeshes).length === 2)  allAssetsLoaded = false;
+    if(!Object.keys(treeMeshes).length === 2)   allAssetsLoaded = false;
+    if(!activeTile)                             allAssetsLoaded = false;
+    if(loadingCounter < 6)                      allAssetsLoaded = false;
+    if(loadingCounter > 50)                     allAssetsLoaded = true;
+    if(allAssetsLoaded)                         return dismissLoading();
+
+    loadingCounter++;
+    setTimeout(checkAssets, 500);
+
+  }
+
+  const dismissLoading = () => {
+
+    gsap.timeline()
+      .to('.loader-container', {
+        opacity:  0,
+        duration: 0.6
+      })
+      .to('.page-loader', {
+        opacity:  0,
+        duration: 0.6
+      })
+      .to('.page-loader', {
+        display: 'none'
+      })
+      .then(() => {
+        loadingDismissed = true;
+        pauseIconAnimation(false);
+      });
+    
+  }
+
+  checkAssets();
+
+}
 
 setScene();
