@@ -1,4 +1,5 @@
-* {
+
+.fullscreen {
   margin: 0px;
   padding: 0px;
   width: 100vw;
@@ -10,10 +11,46 @@ html, body {
   overflow: hidden;
 }
 
+.container {
+  width: calc(100vw - 15px);
+  height: calc(100vh - 15px);
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.canvas {
+  border-radius: 10px;
+}
+
 .hex-container {
-  position: relative;
-  background-color: #f5e6d3;
-  padding: 50px;
+  width: fit-content;
+  height: fit-content;
+  position: absolute;
+  z-index: 10;
+}
+.hex-music {
+  top: 50px;
+  right: 30px;
+  animation: slideInRight 1s ease-in;
+  animation-delay: 8s;
+}
+.hex-info {
+  top: 100px;
+  right: 30px;
+  animation: slideInRight 1s ease-in;
+  animation-delay: 8s;
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .hex {
@@ -25,7 +62,6 @@ html, body {
   cursor: pointer;
   transition: 0.5s;
 }
-
 .hex:before,
 .hex:after {
   position: absolute;
@@ -35,11 +71,9 @@ html, body {
   background: inherit;
   content: '';
 }
- 
 .hex:before {
   transform: rotate(60deg);
 }
-
 .hex:after {
   transform: rotate(-60deg);
 }
@@ -57,17 +91,4 @@ html, body {
   z-index: 1;
   transform-origin: bottom right;
   transform: rotate(-14deg);
-}
-
-.container {
-  width: calc(100vw - 15px);
-  height: calc(100vh - 15px);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.canvas {
-  border-radius: 10px;
 }
