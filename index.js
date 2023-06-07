@@ -3,12 +3,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
 import * as stats from 'https://cdn.skypack.dev/three-stats';
-import { Howl } from 'https://cdn.jsdelivr.net/npm/howler@2.2.3/+esm'
+import { Howl } from 'https://cdn.jsdelivr.net/npm/howler@2.2.3/+esm';
+import { getGPUTier } from 'https://cdn.jsdelivr.net/npm/detect-gpu@5.0.17/+esm';
 
 const container = document.querySelector('.container');
 const canvas    = document.querySelector('.canvas');
 
 let
+gpuTier,
 sizes,
 scene,
 camera,
@@ -65,6 +67,8 @@ muteBgMusic,
 loadingDismissed;
 
 const setScene = async () => {
+
+  gpuTier = await getGPUTier();
 
   sizes = {
     width:  container.offsetWidth,
@@ -149,7 +153,24 @@ const setFog = () => {
     ${FOG_APPLIED_LINE}
   `);
 
-  scene.fog = new THREE.Fog(0xf5e6d3, 70, 115);
+  const near = 
+    gpuTier.tier === 1
+      ? 70
+      : gpuTier.tier === 2
+        ? 70
+        : gpuTier.tier === 3
+          ? 70
+          : 70
+  const far = 
+    gpuTier.tier === 1
+      ? 115
+      : gpuTier.tier === 2
+        ? 115
+        : gpuTier.tier === 3
+          ? 115
+          : 115
+
+  scene.fog = new THREE.Fog(0xf5e6d3, near, far);
 
 }
 
@@ -168,13 +189,22 @@ const setRaycast = () => {
 
 const setTerrainValues = () => {
 
+  const centerTileFromTo = 
+    gpuTier.tier === 1
+      ? 15
+      : gpuTier.tier === 2
+        ? 25
+        : gpuTier.tier === 3
+          ? 40
+          : 30
+
   centerTile = {
-    xFrom:  -30,
-    xTo:    30,
-    yFrom:  -30,
-    yTo:    30
+    xFrom:  -centerTileFromTo,
+    xTo:    centerTileFromTo,
+    yFrom:  -centerTileFromTo,
+    yTo:    centerTileFromTo
   };
-  tileWidth             = 60; // diff between xFrom - xTo (not accounting for 0)
+  tileWidth             = centerTileFromTo * 2; // diff between xFrom - xTo (not accounting for 0)
   amountOfHexInTile     = Math.pow((centerTile.xTo + 1) - centerTile.xFrom, 2); // +1 accounts for 0
   simplex               = new SimplexNoise();
   maxHeight             = 30;
