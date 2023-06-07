@@ -7,8 +7,16 @@
   overflow: hidden;
 }
 
+@font-face {
+  font-family: 'Lunarie';
+  src: url('FontsFree-Net-Lunarie.ttf');
+  font-style: normal;
+}
+
 html, body {
   overflow: hidden;
+  font-family: 'Lunarie', sans-serif;
+  color: #2f2f2f;
 }
 
 
@@ -226,4 +234,57 @@ html, body {
   z-index: 1;
   transform-origin: bottom right;
   transform: rotate(-14deg);
+}
+
+
+
+/* Info Modal */
+
+.info-modal-page {
+  width: calc(100vw - 15px);
+  height: calc(100vh - 15px);
+  background-color: #f5e6d3b8;
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-box {
+  background-color: #f5e6d3;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  position: relative;
+  border-radius: 8px;
+  padding: 30px;
+}
+
+.info-close {
+  position: absolute;
+  top: -35px;
+  right: 10px;
+}
+
+.exit-icon {
+  position: absolute;
+  z-index: 11;
+  top: 23px;
+  left: 0px;
+  width: 20px;
+  height: auto;
+  pointer-events: none;
+}
+
+.info-box h1 {
+  margin: 0px;
+}
+.info-box p {
+  margin: 40px 0px 0px;
+  line-height: 1.7;
 }
