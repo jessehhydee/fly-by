@@ -739,6 +739,13 @@ const determineMovement = () => {
       if(charNeck.rotation.x > -0.6) charNeck.rotation.x -= 0.06;
       if(charBody.rotation.x > -0.4) charBody.rotation.x -= 0.04;
     }
+    else {
+      if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) {
+        character.position.y += charPosYIncrement;
+        charNeck.rotation.x += 0.06;
+        charBody.rotation.x += 0.04;
+      }
+    }
   }
   if((activeKeysPressed.includes(83) || activeKeysPressed.includes(40)) && !movingCharDueToDistance) { // s or down arrow
     if(character.position.y > 27) {
@@ -746,6 +753,13 @@ const determineMovement = () => {
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
       if(charNeck.rotation.x < 0.6) charNeck.rotation.x += 0.06;
       if(charBody.rotation.x < 0.4) charBody.rotation.x += 0.04;
+    }
+    else {
+      if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) {
+        character.position.y -= charPosYIncrement;
+        charNeck.rotation.x -= 0.06;
+        charBody.rotation.x -= 0.04;
+      }
     }
   }
 
