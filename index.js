@@ -69,6 +69,7 @@ loadingDismissed;
 const setScene = async () => {
 
   gpuTier = await getGPUTier();
+  console.log(gpuTier.tier);
 
   sizes = {
     width:  container.offsetWidth,
@@ -155,20 +156,20 @@ const setFog = () => {
 
   const near = 
     gpuTier.tier === 1
-      ? 70
+      ? 20
       : gpuTier.tier === 2
-        ? 70
+        ? 60
         : gpuTier.tier === 3
           ? 70
-          : 70
+          : 20
   const far = 
     gpuTier.tier === 1
-      ? 115
+      ? 72
       : gpuTier.tier === 2
-        ? 115
+        ? 100
         : gpuTier.tier === 3
           ? 115
-          : 115
+          : 72
 
   scene.fog = new THREE.Fog(0xf5e6d3, near, far);
 
@@ -195,8 +196,8 @@ const setTerrainValues = () => {
       : gpuTier.tier === 2
         ? 25
         : gpuTier.tier === 3
-          ? 40
-          : 30
+          ? 30
+          : 15
 
   centerTile = {
     xFrom:  -centerTileFromTo,
@@ -798,14 +799,14 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 6);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 5);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
   }
   
   const calcIdealLookat = () => {
-    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, lookAtPosZ) : new THREE.Vector3(0, 0.5, lookAtPosZ + 6);
+    const idealLookat = thirdPerson ? new THREE.Vector3(0, -1.2, lookAtPosZ) : new THREE.Vector3(0, 0.5, lookAtPosZ + 5);
     idealLookat.applyQuaternion(character.quaternion);
     idealLookat.add(character.position);
     return idealLookat;
