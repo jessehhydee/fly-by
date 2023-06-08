@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'Lunarie';
-  src: url('FontsFree-Net-Lunarie.ttf');
+  src: url('assets/fonts/FontsFree-Net-Lunarie.ttf');
   font-style: normal;
 }
 
@@ -186,13 +186,13 @@ html, body {
   }
 }
 
-.sound-icon {
+.icon {
   position: absolute;
   z-index: 11;
   top: 23px;
   left: 0px;
   width: 20px;
-  height: auto;
+  height: 20px;
   pointer-events: none;
 }
 
@@ -245,7 +245,7 @@ html, body {
   height: calc(100vh - 15px);
   background-color: #f5e6d3b8;
   position: fixed;
-  z-index: 100;
+  z-index: -1;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -253,6 +253,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
 }
 
 .info-box {
@@ -263,6 +264,7 @@ html, body {
   position: relative;
   border-radius: 8px;
   padding: 30px;
+  opacity: 0;
 }
 
 .info-close {

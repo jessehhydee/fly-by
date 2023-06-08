@@ -865,6 +865,10 @@ const listenTo = () => {
   window.addEventListener('keyup', keyUp.bind(this));
   document.querySelector('.hex-music')
     .addEventListener('click', () => updateMusicVolume());
+  document.querySelector('.hex-info')
+    .addEventListener('click', () => toggleInfoModal());
+  document.querySelector('.info-close')
+    .addEventListener('click', () => toggleInfoModal(false));
 
 }
 
@@ -947,6 +951,36 @@ const pauseIconAnimation = (pause = true) => {
 
   document.querySelector('.hex-music').classList.remove('js-loading');
   document.querySelector('.hex-info').classList.remove('js-loading');
+
+}
+
+const toggleInfoModal = (display = true) => {
+
+  if(display) return gsap.timeline()
+    .to('.info-modal-page', {
+      zIndex: 100
+    })
+    .to('.info-modal-page', {
+      opacity:  1,
+      duration: 1
+    })
+    .to('.info-box', {
+      opacity:  1,
+      duration: 1
+    })
+
+  gsap.timeline()
+    .to('.info-box', {
+      opacity:  0,
+      duration: 0.5
+    })
+    .to('.info-modal-page', {
+      opacity:  0,
+      duration: 0.5
+    })
+    .to('.info-modal-page', {
+      zIndex: -1
+    })
 
 }
 
