@@ -33,6 +33,10 @@ character,
 charPosYIncrement,
 charRotateYIncrement,
 charRotateYMax,
+revertUp,
+revertDown,
+revertLeft,
+revertRight,
 mixer,
 charAnimation,
 gliding,
@@ -365,6 +369,10 @@ const setCharacter = async () => {
   charPosYIncrement     = 0;
   charRotateYIncrement  = 0;
   charRotateYMax        = 0.01;
+  revertUp              = false;
+  revertDown            = false;
+  revertLeft            = false;
+  revertRight           = false;
 
   mixer         = new THREE.AnimationMixer(character);
   charAnimation = mixer.clipAction(model.animations[0]);
@@ -733,6 +741,7 @@ const determineMovement = () => {
   character.translateZ(doubleSpeed ? 1 : 0.4);
 
   if(activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) { // w or up arrow
+    revertUp = true;
     if(character.position.y < 90) {
       character.position.y += charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -748,6 +757,7 @@ const determineMovement = () => {
     }
   }
   if((activeKeysPressed.includes(83) || activeKeysPressed.includes(40)) && !movingCharDueToDistance) { // s or down arrow
+    revertDown = true;
     if(character.position.y > 27) {
       character.position.y -= charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -764,12 +774,14 @@ const determineMovement = () => {
   }
 
   if(activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) { // a or left arrow
+    revertLeft = true;
     character.rotateY(charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
   }
   if(activeKeysPressed.includes(68) || activeKeysPressed.includes(39)) { // d or right arrow
+    revertRight = true;
     character.rotateY(-charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
@@ -781,30 +793,42 @@ const determineMovement = () => {
   if((!activeKeysPressed.includes(87) && !activeKeysPressed.includes(38)) && (!activeKeysPressed.includes(83) && !activeKeysPressed.includes(40)) ||
     (activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) && (activeKeysPressed.includes(83) || activeKeysPressed.includes(40))) {
     if(charPosYIncrement > 0) charPosYIncrement -= 0.02;
-    if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) { // reverting from going up
-      character.position.y += charPosYIncrement;
-      charNeck.rotation.x += 0.06;
-      charBody.rotation.x += 0.04;
+    if(revertUp) {
+      if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) { // reverting from going up
+        character.position.y += charPosYIncrement;
+        charNeck.rotation.x += 0.06;
+        charBody.rotation.x += 0.04;
+      }
+      else revertUp = false;
     }
-    if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) { // reverting from going down
-      character.position.y -= charPosYIncrement;
-      charNeck.rotation.x -= 0.06;
-      charBody.rotation.x -= 0.04;
+    if(revertDown) {
+      if(charNeck.rotation.x > 0 || charBody.rotation.x > 0) { // reverting from going down
+        character.position.y -= charPosYIncrement;
+        charNeck.rotation.x -= 0.06;
+        charBody.rotation.x -= 0.04;
+      }
+      else revertDown = false;
     }
   }
 
   if((!activeKeysPressed.includes(65) && !activeKeysPressed.includes(37)) && (!activeKeysPressed.includes(68) && !activeKeysPressed.includes(39)) ||
     (activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) && (activeKeysPressed.includes(68) || activeKeysPressed.includes(39))) {
     if(charRotateYIncrement > 0) charRotateYIncrement -= 0.0005;
-    if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) { // reverting from going left
-      character.rotateY(charRotateYIncrement);
-      charNeck.rotation.y += 0.07;
-      charBody.rotation.y -= 0.04;
+    if(revertLeft) {
+      if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) { // reverting from going left
+        character.rotateY(charRotateYIncrement);
+        charNeck.rotation.y += 0.07;
+        charBody.rotation.y -= 0.04;
+      }
+      else revertLeft = false;
     }
-    if(charNeck.rotation.y > 0 || charBody.rotation.y < 0) { // reverting from going right
-      character.rotateY(-charRotateYIncrement);
-      charNeck.rotation.y -= 0.07;
-      charBody.rotation.y += 0.04;
+    if(revertRight) {
+      if(charNeck.rotation.y > 0 || charBody.rotation.y < 0) { // reverting from going right
+        character.rotateY(-charRotateYIncrement);
+        charNeck.rotation.y -= 0.07;
+        charBody.rotation.y += 0.04;
+      }
+      else revertRight = false;
     }
   }
 
