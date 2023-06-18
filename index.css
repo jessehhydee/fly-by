@@ -260,11 +260,17 @@ html, body {
   background-color: #efdec8;
   width: 100%;
   max-width: 500px;
+  margin: 30px;
   height: auto;
   position: relative;
   border-radius: 8px;
   padding: 30px;
   opacity: 0;
+}
+@media (max-width: 320px) {
+  .info-box {
+    padding: 20px;
+  }
 }
 
 .info-close {
@@ -289,4 +295,12 @@ html, body {
 .info-box p {
   margin: 40px 0px 0px;
   line-height: 1.7;
+}
+@media (max-width: 500px) {
+  .info-box h1 {
+    font-size: 18px;
+  }
+  .info-box p {
+    font-size: 14px;
+  }
 }

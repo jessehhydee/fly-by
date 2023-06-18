@@ -316,43 +316,6 @@ const cleanUpClouds = () => {
 
 }
 
-// const setCharAnimation = () => {
-
-//   const 
-//   min = 3,
-//   max = 14;
-
-//   if(charAnimationTimeout) clearTimeout(charAnimationTimeout);
-
-//   const toggleAnimation = () => {
-
-//     if(flyingIn) return;
-//     if(!gliding) 
-//       charAnimation
-//         .reset()
-//         .setEffectiveTimeScale(doubleSpeed ? 2 : 1)
-//         .setEffectiveWeight(1)
-//         .setLoop(THREE.LoopRepeat)
-//         .fadeIn(1)
-//         .play(); 
-//     else charAnimation.fadeOut(2);
-//     gliding = !gliding;
-
-//   };
-
-//   const interval = () => {
-
-//     toggleAnimation();
-
-//     const randomTime      = Math.floor(Math.random() * (max - min + 1) + min);
-//     charAnimationTimeout  = setTimeout(interval, randomTime * 1000);
-
-//   }
-
-//   interval();
-  
-// }
-
 const setCharAnimation = () => {
 
   const 
@@ -363,29 +326,21 @@ const setCharAnimation = () => {
 
   const interval = () => {
 
-    // if(!flyingIn) {
-      if(!gliding) 
-        charAnimation
-          .reset()
-          .setEffectiveTimeScale(doubleSpeed ? 2 : 1)
-          .setEffectiveWeight(1)
-          .setLoop(THREE.LoopRepeat)
-          .fadeIn(1)
-          .play(); 
-      else charAnimation.fadeOut(2);
-      gliding = !gliding;
-    // }
+    if(!gliding) 
+      charAnimation
+        .reset()
+        .setEffectiveTimeScale(doubleSpeed ? 2 : 1)
+        .setEffectiveWeight(1)
+        .setLoop(THREE.LoopRepeat)
+        .fadeIn(1)
+        .play(); 
+    else charAnimation.fadeOut(2);
+    gliding = !gliding;
 
     const randomTime      = Math.floor(Math.random() * (max - min + 1) + min);
     charAnimationTimeout  = setTimeout(interval, randomTime * 1000);
   }
 
-  // const flyingInInterval = () => {
-  //   if(flyingIn) setTimeout(flyingInInterval, 1000);
-  //   else interval();
-  // }
-
-  // flyingInInterval();
   interval();
   
 }
@@ -411,9 +366,6 @@ const setCharacter = async () => {
 
   geo.computeBoundsTree();
   scene.add(character);
-  
-  setCharAnimation();
-  // setTimeout(() => setCharAnimation(), 6000); // wait for fly-in animation
 
   return;
 
@@ -881,7 +833,10 @@ const camUpdate = () => {
   if(camY > 7)    camY -= 0.5;
   if(camZ < -10)  camZ += 0.5;
   else {
-    if(flyingIn) cleanUpClouds(); // This statement is called once when the fly in animation is compelte
+    if(flyingIn) {
+      setCharAnimation();
+      cleanUpClouds(); // This statement is called once when the fly in animation is compelte
+    }
   }
 
 }
