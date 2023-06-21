@@ -101,6 +101,7 @@ const setScene = async () => {
   activeKeysPressed = [];
   muteBgMusic       = true;
 
+  joystick();
   setFog();
   setRaycast();
   setTerrainValues();
@@ -121,6 +122,13 @@ const setScene = async () => {
   checkLoadingPage();
 
 }
+
+const joystick = () => {
+  var options = {
+    zone: document.getElementById('zone-joystick'),
+  };
+  var manager = nipplejs.create(options);
+};
 
 const setFog = () => {
 
@@ -722,7 +730,7 @@ const determineMovement = () => {
 
   character.translateZ(doubleSpeed ? 1 : 0.4);
 
-  if(activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) { // w or up arrow
+  if(activeKeysPressed.includes(87)) { // w or up arrow
     if(character.position.y < 90) {
       character.position.y += charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -737,7 +745,7 @@ const determineMovement = () => {
       }
     }
   }
-  if((activeKeysPressed.includes(83) || activeKeysPressed.includes(40)) && !movingCharDueToDistance) { // s or down arrow
+  if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s or down arrow
     if(character.position.y > 27) {
       character.position.y -= charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -753,13 +761,13 @@ const determineMovement = () => {
     }
   }
 
-  if(activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) { // a or left arrow
+  if(activeKeysPressed.includes(65)) { // a or left arrow
     character.rotateY(charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
   }
-  if(activeKeysPressed.includes(68) || activeKeysPressed.includes(39)) { // d or right arrow
+  if(activeKeysPressed.includes(68)) { // d or right arrow
     character.rotateY(-charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
@@ -768,8 +776,8 @@ const determineMovement = () => {
 
   // Revert
 
-  if((!activeKeysPressed.includes(87) && !activeKeysPressed.includes(38)) && (!activeKeysPressed.includes(83) && !activeKeysPressed.includes(40)) ||
-    (activeKeysPressed.includes(87) || activeKeysPressed.includes(38)) && (activeKeysPressed.includes(83) || activeKeysPressed.includes(40))) {
+  if(!activeKeysPressed.includes(87) && !activeKeysPressed.includes(83) ||
+    activeKeysPressed.includes(87) && activeKeysPressed.includes(83)) {
     if(charPosYIncrement > 0) charPosYIncrement -= 0.02;
     if(charNeck.rotation.x < 0 || charBody.rotation.x < 0) { // reverting from going up
       character.position.y += charPosYIncrement;
@@ -783,8 +791,8 @@ const determineMovement = () => {
     }
   }
 
-  if((!activeKeysPressed.includes(65) && !activeKeysPressed.includes(37)) && (!activeKeysPressed.includes(68) && !activeKeysPressed.includes(39)) ||
-    (activeKeysPressed.includes(65) || activeKeysPressed.includes(37)) && (activeKeysPressed.includes(68) || activeKeysPressed.includes(39))) {
+  if(!activeKeysPressed.includes(65) && !activeKeysPressed.includes(68) ||
+    activeKeysPressed.includes(65) && activeKeysPressed.includes(68)) {
     if(charRotateYIncrement > 0) charRotateYIncrement -= 0.0005;
     if(charNeck.rotation.y < 0 || charBody.rotation.y > 0) { // reverting from going left
       character.rotateY(charRotateYIncrement);
