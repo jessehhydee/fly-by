@@ -64,7 +64,8 @@ activeKeysPressed,
 statsPanel,
 bgMusic,
 muteBgMusic,
-loadingDismissed;
+loadingDismissed,
+wasdDisplaying;
 
 const setScene = async () => {
 
@@ -100,6 +101,7 @@ const setScene = async () => {
   
   activeKeysPressed = [];
   muteBgMusic       = true;
+  wasdDisplaying    = true;
 
   joystick();
   setFog();
@@ -126,6 +128,10 @@ const setScene = async () => {
 const joystick = () => {
   var options = {
     zone: document.getElementById('zone-joystick'),
+    shape: 'circle',
+    restJoystick: true,
+    mode: 'static',
+    position: {left: '10%', bottom: '10%'}
   };
   var manager = nipplejs.create(options);
 };
@@ -726,11 +732,20 @@ const keyUp = (event) => {
 
 }
 
+const hideWASDIcon = () => {
+
+  if(!wasdDisplaying) return;
+
+  document.querySelector('.wasd-icon').style.display = 'none';
+  wasdDisplaying = false;
+
+}
+
 const determineMovement = () => {
 
   character.translateZ(doubleSpeed ? 1 : 0.4);
 
-  if(activeKeysPressed.includes(87)) { // w or up arrow
+  if(activeKeysPressed.includes(87)) { // w
     if(character.position.y < 90) {
       character.position.y += charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -744,8 +759,9 @@ const determineMovement = () => {
         charBody.rotation.x += 0.04;
       }
     }
+    hideWASDIcon();
   }
-  if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s or down arrow
+  if(activeKeysPressed.includes(83) && !movingCharDueToDistance) { // s
     if(character.position.y > 27) {
       character.position.y -= charPosYIncrement;
       if(charPosYIncrement < 0.3) charPosYIncrement += 0.02;
@@ -759,19 +775,22 @@ const determineMovement = () => {
         charBody.rotation.x -= 0.04;
       }
     }
+    hideWASDIcon();
   }
 
-  if(activeKeysPressed.includes(65)) { // a or left arrow
+  if(activeKeysPressed.includes(65)) { // a
     character.rotateY(charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y > -0.7) charNeck.rotation.y -= 0.07;
     if(charBody.rotation.y < 0.4) charBody.rotation.y += 0.04;
+    hideWASDIcon();
   }
-  if(activeKeysPressed.includes(68)) { // d or right arrow
+  if(activeKeysPressed.includes(68)) { // d
     character.rotateY(-charRotateYIncrement);
     if(charRotateYIncrement < charRotateYMax) charRotateYIncrement += 0.0005;
     if(charNeck.rotation.y < 0.7) charNeck.rotation.y += 0.07;
     if(charBody.rotation.y > -0.4) charBody.rotation.y -= 0.04;
+    hideWASDIcon();
   }
 
   // Revert
@@ -962,11 +981,13 @@ const pauseIconAnimation = (pause = true) => {
   if(pause) {
     document.querySelector('.hex-music').classList.add('js-loading');
     document.querySelector('.hex-info').classList.add('js-loading');
+    document.querySelector('.wasd-icon').classList.add('js-loading');
     return;
   }
 
   document.querySelector('.hex-music').classList.remove('js-loading');
   document.querySelector('.hex-info').classList.remove('js-loading');
+  document.querySelector('.wasd-icon').classList.remove('js-loading');
 
 }
 
