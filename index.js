@@ -127,14 +127,50 @@ const joystick = () => {
 
   const calcJoystickDir = (deg) => {
 
-    if(deg < 22.5 || deg >= 337.5) // right
-    if(deg >= 22.5 || deg < 67.5) // up right
-    if(deg >= 67.5 || deg < 112.5) // up
-    if(deg >= 112.5 || deg < 157.5) // up left
-    if(deg >= 157.5 || deg < 202.5) // left
-    if(deg >= 202.5 || deg < 247.5) // down left
-    if(deg >= 247.5 || deg < 292.5) // down
-    if(deg >= 292.5 || deg < 337.5) // down right
+    if((deg < 22.5 || deg >= 337.5) && !activeKeysPressed.includes(39)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(39);
+      console.log('right');
+    } // right
+    if((deg >= 22.5 || deg < 67.5) && !activeKeysPressed.includes(38) && !activeKeysPressed.includes(39)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(38);
+      activeKeysPressed.push(39);
+      console.log('up right');
+    } // up right
+    if((deg >= 67.5 || deg < 112.5) && !activeKeysPressed.includes(38)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(38);
+      console.log('up');
+    }  // up
+    if((deg >= 112.5 || deg < 157.5) && !activeKeysPressed.includes(38) && !activeKeysPressed.includes(37)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(38);
+      activeKeysPressed.push(37);
+      console.log('up left');
+    } // up left
+    if((deg >= 157.5 || deg < 202.5) && !activeKeysPressed.includes(37)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(37);
+      console.log('left');
+    } // left
+    if((deg >= 202.5 || deg < 247.5) && !activeKeysPressed.includes(40) && !activeKeysPressed.includes(37)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(40);
+      activeKeysPressed.push(37);
+      console.log('down left');
+    } // down left
+    if((deg >= 247.5 || deg < 292.5) && !activeKeysPressed.includes(40)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(40);
+      console.log('down');
+    } // down
+    if((deg >= 292.5 || deg < 337.5) && !activeKeysPressed.includes(40) && !activeKeysPressed.includes(39)) {
+      activeKeysPressed = [];
+      activeKeysPressed.push(40);
+      activeKeysPressed.push(39);
+      console.log('down right');
+    } // down right
 
   }
 
