@@ -127,48 +127,58 @@ const joystick = () => {
 
   const calcJoystickDir = (deg) => {
 
-    if((deg < 22.5 || deg >= 337.5) && !activeKeysPressed.includes(39)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(39);
+    // console.log(deg);
+
+    // if((deg < 22.5 || deg >= 337.5) && !activeKeysPressed.includes(39)) {
+    if(deg < 22.5 || deg >= 337.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(39);
       console.log('right');
     } // right
-    if((deg >= 22.5 || deg < 67.5) && !activeKeysPressed.includes(38) && !activeKeysPressed.includes(39)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(38);
-      activeKeysPressed.push(39);
+    // if((deg >= 22.5 || deg < 67.5) && (!activeKeysPressed.includes(38) && !activeKeysPressed.includes(39))) {
+    if(deg >= 22.5 || deg < 67.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(38);
+      // activeKeysPressed.push(39);
       console.log('up right');
     } // up right
-    if((deg >= 67.5 || deg < 112.5) && !activeKeysPressed.includes(38)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(38);
+    // if((deg >= 67.5 || deg < 112.5) && !activeKeysPressed.includes(38)) {
+    if(deg >= 67.5 || deg < 112.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(38);
       console.log('up');
     }  // up
-    if((deg >= 112.5 || deg < 157.5) && !activeKeysPressed.includes(38) && !activeKeysPressed.includes(37)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(38);
-      activeKeysPressed.push(37);
+    // if((deg >= 112.5 || deg < 157.5) && (!activeKeysPressed.includes(38) && !activeKeysPressed.includes(37))) {
+    if(deg >= 112.5 || deg < 157.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(38);
+      // activeKeysPressed.push(37);
       console.log('up left');
     } // up left
-    if((deg >= 157.5 || deg < 202.5) && !activeKeysPressed.includes(37)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(37);
+    // if((deg >= 157.5 || deg < 202.5) && !activeKeysPressed.includes(37)) {
+    if(deg >= 157.5 || deg < 202.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(37);
       console.log('left');
     } // left
-    if((deg >= 202.5 || deg < 247.5) && !activeKeysPressed.includes(40) && !activeKeysPressed.includes(37)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(40);
-      activeKeysPressed.push(37);
+    // if((deg >= 202.5 || deg < 247.5) && (!activeKeysPressed.includes(40) && !activeKeysPressed.includes(37))) {
+    if(deg >= 202.5 || deg < 247.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(40);
+      // activeKeysPressed.push(37);
       console.log('down left');
     } // down left
-    if((deg >= 247.5 || deg < 292.5) && !activeKeysPressed.includes(40)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(40);
+    // if((deg >= 247.5 || deg < 292.5) && !activeKeysPressed.includes(40)) {
+    if(deg >= 247.5 || deg < 292.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(40);
       console.log('down');
     } // down
-    if((deg >= 292.5 || deg < 337.5) && !activeKeysPressed.includes(40) && !activeKeysPressed.includes(39)) {
-      activeKeysPressed = [];
-      activeKeysPressed.push(40);
-      activeKeysPressed.push(39);
+    // if((deg >= 292.5 || deg < 337.5) && (!activeKeysPressed.includes(40) && !activeKeysPressed.includes(39))) {
+    if(deg >= 292.5 || deg < 337.5) {
+      // activeKeysPressed = [];
+      // activeKeysPressed.push(40);
+      // activeKeysPressed.push(39);
       console.log('down right');
     } // down right
 
@@ -224,18 +234,18 @@ const setFog = () => {
     gpuTier.tier === 1
       ? 20
       : gpuTier.tier === 2
-        ? 60
-        : gpuTier.tier === 3
-          ? 70
-          : 20
+      ? 60
+      : gpuTier.tier === 3
+      ? 70
+      : 20
   const far = 
     gpuTier.tier === 1
       ? 72
       : gpuTier.tier === 2
-        ? 100
-        : gpuTier.tier === 3
-          ? 115
-          : 72
+      ? 100
+      : gpuTier.tier === 3
+      ? 115
+      : 72
 
   scene.fog = new THREE.Fog(0xf5e6d3, near, far);
 
