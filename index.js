@@ -127,59 +127,27 @@ const joystick = () => {
 
   const calcJoystickDir = (deg) => {
 
-    // console.log(deg);
+    activeKeysPressed = [];
 
-    // if((deg < 22.5 || deg >= 337.5) && !activeKeysPressed.includes(39)) {
-    if(deg < 22.5 || deg >= 337.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(39);
-      console.log('right');
-    } // right
-    // if((deg >= 22.5 || deg < 67.5) && (!activeKeysPressed.includes(38) && !activeKeysPressed.includes(39))) {
-    if(deg >= 22.5 || deg < 67.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(38);
-      // activeKeysPressed.push(39);
-      console.log('up right');
+    if(deg < 22.5 || deg >= 337.5) activeKeysPressed.push(39); // right
+    if(deg >= 22.5 && deg < 67.5) {
+      activeKeysPressed.push(38);
+      activeKeysPressed.push(39);
     } // up right
-    // if((deg >= 67.5 || deg < 112.5) && !activeKeysPressed.includes(38)) {
-    if(deg >= 67.5 || deg < 112.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(38);
-      console.log('up');
-    }  // up
-    // if((deg >= 112.5 || deg < 157.5) && (!activeKeysPressed.includes(38) && !activeKeysPressed.includes(37))) {
-    if(deg >= 112.5 || deg < 157.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(38);
-      // activeKeysPressed.push(37);
-      console.log('up left');
+    if(deg >= 67.5 && deg < 112.5) activeKeysPressed.push(38); // up
+    if(deg >= 112.5 && deg < 157.5) {
+      activeKeysPressed.push(38);
+      activeKeysPressed.push(37);
     } // up left
-    // if((deg >= 157.5 || deg < 202.5) && !activeKeysPressed.includes(37)) {
-    if(deg >= 157.5 || deg < 202.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(37);
-      console.log('left');
-    } // left
-    // if((deg >= 202.5 || deg < 247.5) && (!activeKeysPressed.includes(40) && !activeKeysPressed.includes(37))) {
-    if(deg >= 202.5 || deg < 247.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(40);
-      // activeKeysPressed.push(37);
-      console.log('down left');
+    if(deg >= 157.5 && deg < 202.5) activeKeysPressed.push(37); // left
+    if(deg >= 202.5 && deg < 247.5) {
+      activeKeysPressed.push(40);
+      activeKeysPressed.push(37);
     } // down left
-    // if((deg >= 247.5 || deg < 292.5) && !activeKeysPressed.includes(40)) {
-    if(deg >= 247.5 || deg < 292.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(40);
-      console.log('down');
-    } // down
-    // if((deg >= 292.5 || deg < 337.5) && (!activeKeysPressed.includes(40) && !activeKeysPressed.includes(39))) {
-    if(deg >= 292.5 || deg < 337.5) {
-      // activeKeysPressed = [];
-      // activeKeysPressed.push(40);
-      // activeKeysPressed.push(39);
-      console.log('down right');
+    if(deg >= 247.5 && deg < 292.5) activeKeysPressed.push(40); // down
+    if(deg >= 292.5 && deg < 337.5) {
+      activeKeysPressed.push(40);
+      activeKeysPressed.push(39);
     } // down right
 
   }
@@ -188,36 +156,36 @@ const joystick = () => {
     zone: document.getElementById('zone-joystick'),
     shape: 'circle',
     restJoystick: true,
-    mode: 'static',
-    position: {left: '10%', bottom: '10%'}
+    mode: 'dynamic',
   };
 
   const manager = nipplejs.create(joystickOptions);
 
   manager.on('move', (e, data) => calcJoystickDir(data.angle.degree));
+  manager.on('end', () => (activeKeysPressed = []));
 
 };
 
 const setFog = () => {
 
   THREE.ShaderChunk.fog_pars_vertex += `
-  #ifdef USE_FOG
-    varying vec3 vWorldPosition;
-  #endif
+    #ifdef USE_FOG
+      varying vec3 vWorldPosition;
+    #endif
   `;
 
   THREE.ShaderChunk.fog_vertex += `
-  #ifdef USE_FOG
-    vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
-    vWorldPosition = worldPosition.xyz;
-  #endif
+    #ifdef USE_FOG
+      vec4 worldPosition = projectionMatrix * modelMatrix * vec4(position, 1.0);
+      vWorldPosition = worldPosition.xyz;
+    #endif
   `;
 
   THREE.ShaderChunk.fog_pars_fragment += `
-  #ifdef USE_FOG
-    varying vec3 vWorldPosition;
-    float fogHeight = 10.0;
-  #endif
+    #ifdef USE_FOG
+      varying vec3 vWorldPosition;
+      float fogHeight = 10.0;
+    #endif
   `;
 
   const FOG_APPLIED_LINE = 'gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );';
@@ -270,10 +238,10 @@ const setTerrainValues = () => {
     gpuTier.tier === 1
       ? 15
       : gpuTier.tier === 2
-        ? 25
-        : gpuTier.tier === 3
-          ? 30
-          : 15
+      ? 25
+      : gpuTier.tier === 3
+      ? 30
+      : 15
 
   centerTile = {
     xFrom:  -centerTileFromTo,
