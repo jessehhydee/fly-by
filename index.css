@@ -148,6 +148,17 @@ html, body {
 
 
 
+/* Joystick */
+
+.joystick {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+
+
 /* Icons */
 
 .js-loading {

@@ -5,10 +5,10 @@
 
   <head>
 
-    <title>pro</title>
+    <title>Fly By</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link rel="icon" href="assets/favicon.png"> -->
+    <link rel="icon" href="assets/favicon.png">
     
     <link rel="stylesheet" type="text/css" href="index.css">
 
@@ -50,10 +50,11 @@
       <canvas class="fullscreen canvas"></canvas>
     </div>
 
-    <div id="zone-joystick"></div>
+    <div id="zone-joystick" class="joystick"></div>
 
     <div class="hex-container hex-music">
       <img 
+       id="sound"
        class="icon" 
        src="assets/icons/sound-off.svg" 
        alt="Sound On">
@@ -85,8 +86,10 @@
           This project started off as a procedually generated 10 by 10 tile of hexagons.
           The evolution of the Fly By experience is rather simple; 
           One feature idea at a time, never knowing what this project may become.
-          <br><br>
-          Hint: Try pressing 'Q' or the spacebar
+          <span class="hint-message">
+            <br><br>
+            Hint: Try pressing 'Q' or the spacebar
+          </span>
           <br><br>
           - Jesse
         </p>

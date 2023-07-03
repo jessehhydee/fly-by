@@ -155,7 +155,6 @@ const joystick = () => {
   const joystickOptions = {
     zone: document.getElementById('zone-joystick'),
     shape: 'circle',
-    restJoystick: true,
     mode: 'dynamic',
   };
 
@@ -986,7 +985,7 @@ const updateMusicVolume = () => {
   muteBgMusic = !muteBgMusic;
   bgMusic.volume(muteBgMusic ? 0 : 0.01);
 
-  document.querySelector('.sound-icon').src = 
+  document.getElementById('sound').src = 
     muteBgMusic ? 
     'assets/icons/sound-off.svg' :
     'assets/icons/sound-on.svg'
