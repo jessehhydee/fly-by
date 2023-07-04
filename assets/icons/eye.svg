@@ -1,10 +1,20 @@
 <?xml version="1.0" ?>
 <!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg id="Layer_1" style="enable-background:new 0 0 64 64;" version="1.1" viewBox="0 0 64 64" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-	<style type="text/css">.st0{fill:#134563;}</style>
-	<g>
-		<g id="Icon-Eye" transform="translate(278.000000, 484.000000)">
-			<path class="st0" d="M-246-436.6c-16.2,0-23.5-14.3-23.8-14.9c-0.2-0.4-0.2-0.8,0-1.2c0.3-0.6,7.6-14.9,23.8-14.9     s23.5,14.3,23.8,14.9c0.2,0.4,0.2,0.8,0,1.2C-222.5-450.8-229.8-436.6-246-436.6L-246-436.6z M-267.1-452     c1.5,2.6,8.4,12.8,21.1,12.8c12.7,0,19.6-10.2,21.1-12.8c-1.5-2.6-8.4-12.8-21.1-12.8C-258.7-464.8-265.6-454.6-267.1-452     L-267.1-452z" id="Fill-174"/><path class="st0" d="M-246-439.4c-7,0-12.6-5.7-12.6-12.6s5.7-12.6,12.6-12.6s12.6,5.7,12.6,12.6     S-239-439.4-246-439.4L-246-439.4z M-246-462c-5.5,0-10,4.5-10,10s4.5,10,10,10s10-4.5,10-10S-240.5-462-246-462L-246-462z" id="Fill-175"/><path class="st0" d="M-246-445c-3.8,0-7-3.1-7-7c0-0.7,0.6-1.3,1.3-1.3c0.7,0,1.3,0.6,1.3,1.3     c0,2.4,1.9,4.3,4.3,4.3s4.3-1.9,4.3-4.3s-1.9-4.3-4.3-4.3c-0.7,0-1.3-0.6-1.3-1.3c0-0.7,0.6-1.3,1.3-1.3c3.8,0,7,3.1,7,7     S-242.2-445-246-445" id="Fill-176"/>
-		</g>
-	</g>
+<svg enable-background="new 0 0 32 32" height="32px" id="Layer_1" version="1.1" viewBox="0 0 32 32" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <style>.cls-1{fill:#fff;}</style>
+  </defs>
+  <g>
+    <polyline fill="none" points="   649,137.999 675,137.999 675,155.999 661,155.999  " stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <polyline fill="none" points="   653,155.999 649,155.999 649,141.999  " stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <polyline fill="none" points="   661,156 653,162 653,156  " stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+  </g>
+  <g>
+    <g>
+      <path class="cls-1" d="M16,25c-4.265,0-8.301-1.807-11.367-5.088c-0.377-0.403-0.355-1.036,0.048-1.413c0.404-0.377,1.036-0.355,1.414,0.048    C8.778,21.419,12.295,23,16,23c4.763,0,9.149-2.605,11.84-7c-2.69-4.395-7.077-7-11.84-7c-4.938,0-9.472,2.801-12.13,7.493    c-0.272,0.481-0.884,0.651-1.363,0.377c-0.481-0.272-0.649-0.882-0.377-1.363C5.147,10.18,10.333,7,16,7    c5.668,0,10.853,3.18,13.87,8.507c0.173,0.306,0.173,0.68,0,0.985C26.853,21.819,21.668,25,16,25z"/>
+    </g>
+    <g>
+      <path class="cls-1" d="M16,21c-2.757,0-5-2.243-5-5s2.243-5,5-5s5,2.243,5,5S18.757,21,16,21z M16,13c-1.654,0-3,1.346-3,3s1.346,3,3,3    s3-1.346,3-3S17.654,13,16,13z"/>
+    </g>
+  </g>
 </svg>

@@ -858,7 +858,7 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 5);
+    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 6);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
@@ -877,7 +877,7 @@ const camUpdate = () => {
   }
 
   const idealOffset = calcIdealOffset();
-  const idealLookat = calcIdealLookat();
+  const idealLookat = calcIdealLookat(); 
 
   currentPos.copy(idealOffset);
   currentLookAt.copy(idealLookat);
@@ -1013,11 +1013,15 @@ const pauseIconAnimation = (pause = true) => {
   if(pause) {
     document.querySelector('.hex-music').classList.add('js-loading');
     document.querySelector('.hex-info').classList.add('js-loading');
+    document.querySelector('.hex-speed').classList.add('js-loading');
+    document.querySelector('.hex-birds-eye').classList.add('js-loading');
     return;
   }
 
   document.querySelector('.hex-music').classList.remove('js-loading');
   document.querySelector('.hex-info').classList.remove('js-loading');
+  document.querySelector('.hex-speed').classList.remove('js-loading');
+  document.querySelector('.hex-birds-eye').classList.remove('js-loading');
 
 }
 
