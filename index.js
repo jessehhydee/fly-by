@@ -738,16 +738,28 @@ const resize = () => {
 
 }
 
+
+const toggleDoubleSpeed = () => {
+
+  if(flyingIn) return;
+
+  doubleSpeed = doubleSpeed ? false : true;
+  charRotateYMax = doubleSpeed ? 0.02 : 0.01;
+  setCharAnimation();
+
+}
+
+const toggleBirdsEyeView = () => {
+
+  if(flyingIn) return;
+  thirdPerson = thirdPerson ? false : true;
+
+}
+
 const keyDown = (event) => {
 
-  if(event.keyCode === 81 & !flyingIn)
-    thirdPerson ? thirdPerson = false : thirdPerson = true;
-
-  if(event.keyCode === 32 & !flyingIn) {
-    doubleSpeed ? doubleSpeed = false : doubleSpeed = true;
-    doubleSpeed ? charRotateYMax = 0.02 : charRotateYMax = 0.01;
-    setCharAnimation();
-  }
+  if(event.keyCode === 32) toggleDoubleSpeed();
+  if(event.keyCode === 81) toggleBirdsEyeView();
 
   if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
@@ -920,6 +932,10 @@ const listenTo = () => {
     .addEventListener('click', () => toggleInfoModal());
   document.querySelector('.info-close')
     .addEventListener('click', () => toggleInfoModal(false));
+  document.querySelector('.hex-speed')
+    .addEventListener('click', () => toggleDoubleSpeed());
+  document.querySelector('.hex-birds-eye')
+    .addEventListener('click', () => toggleBirdsEyeView());
 
 }
 

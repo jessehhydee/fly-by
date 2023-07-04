@@ -181,6 +181,16 @@ html, body {
   right: 50px;
   animation: slideInLeft 8.05s ease-in;
 }
+.hex-speed {
+  bottom: 100px;
+  right: 50px;
+  animation: slideInLeft 8.1s ease-in;
+}
+.hex-birds-eye {
+  bottom: 40px;
+  right: 50px;
+  animation: slideInLeft 8.15s ease-in;
+}
 
 @keyframes slideInLeft {
   0% {
