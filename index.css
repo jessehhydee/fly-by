@@ -27,7 +27,7 @@ html, body {
   width: calc(100vw - 15px);
   height: calc(100vh - 15px);
   background-color: #f5e6d3;
-  position: fixed;
+  position: absolute;
   z-index: 100;
   top: 50%;
   left: 50%;
@@ -195,11 +195,11 @@ html, body {
 @keyframes slideInLeft {
   0% {
     opacity: 0;
-    right: -20px;
+    right: 35px;
   }
   95% {
     opacity: 0;
-    right: -20px;
+    right: 35px;
   }
   100% {
     opacity: 1;
@@ -265,7 +265,7 @@ html, body {
   width: calc(100vw - 15px);
   height: calc(100vh - 15px);
   background-color: #f5e6d3b8;
-  position: fixed;
+  position: absolute;
   z-index: -1;
   top: 50%;
   left: 50%;

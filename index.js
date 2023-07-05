@@ -858,7 +858,7 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(-0.5, camY, camZ) : new THREE.Vector3(0, 3, 6);
+    const idealOffset = thirdPerson ? new THREE.Vector3(0, camY, camZ) : new THREE.Vector3(0, 3, 6);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
