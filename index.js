@@ -774,6 +774,8 @@ const determineMovement = () => {
 
   character.translateZ(doubleSpeed ? 1 : 0.4);
 
+  if(flyingIn) return;
+
   if(activeKeysPressed.includes(38)) { // up arrow
     if(character.position.y < 90) {
       character.position.y += charPosYIncrement;
