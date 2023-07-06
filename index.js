@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.5.23/+esm';
 import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise@3.0.0';
-import * as stats from 'https://cdn.skypack.dev/three-stats';
 import { Howl } from 'https://cdn.jsdelivr.net/npm/howler@2.2.3/+esm';
 import { getGPUTier } from 'https://cdn.jsdelivr.net/npm/detect-gpu@5.0.17/+esm';
 
@@ -61,7 +60,6 @@ textures,
 terrainTiles,
 activeTile,
 activeKeysPressed,
-statsPanel,
 bgMusic,
 muteBgMusic,
 loadingDismissed;
@@ -115,7 +113,6 @@ const setScene = async () => {
   calcCharPos();
   resize();
   listenTo();
-  showStats();
   render();
 
   pauseIconAnimation();
@@ -906,7 +903,7 @@ const calcCharPos = () => {
 
   if (intersects[0].distance < distance) {
     movingCharDueToDistance = true;
-    character.position.y += doubleSpeed ? 0.2 : 0.1;
+    character.position.y += doubleSpeed ? 0.3 : 0.1;
   }
   else {
     if(movingCharDueToDistance && !movingCharTimeout) {
@@ -939,14 +936,6 @@ const listenTo = () => {
 
 }
 
-const showStats = () => {
-
-  statsPanel = new stats.Stats();
-  statsPanel.showPanel(0);
-  document.body.appendChild(statsPanel.dom);
-  
-}
-
 const cleanUp = (obj) => {
 
   if(obj.geometry && obj.material) {
@@ -969,7 +958,6 @@ const cleanUp = (obj) => {
 
 const render = () => {
 
-  statsPanel.begin();
   if(loadingDismissed) {
     determineMovement();
     calcCharPos();
@@ -977,7 +965,6 @@ const render = () => {
     if(mixer) mixer.update(clock.getDelta());
   }
   renderer.render(scene, camera);
-  statsPanel.end();
 
   requestAnimationFrame(render.bind(this))
 
