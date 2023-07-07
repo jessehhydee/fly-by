@@ -152,7 +152,8 @@ const joystick = () => {
   const joystickOptions = {
     zone: document.getElementById('zone-joystick'),
     shape: 'circle',
-    mode: 'dynamic',
+    color: '#ffffff6b',
+    mode: 'dynamic'
   };
 
   const manager = nipplejs.create(joystickOptions);
@@ -755,15 +756,15 @@ const toggleBirdsEyeView = () => {
 
 const keyDown = (event) => {
 
-  if(event.keyCode === 32) toggleDoubleSpeed();
-  if(event.keyCode === 81) toggleBirdsEyeView();
-
   if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
     
 }
 
 const keyUp = (event) => {
+
+  if(event.keyCode === 32) toggleDoubleSpeed();
+  if(event.keyCode === 90) toggleBirdsEyeView();
 
   const index = activeKeysPressed.indexOf(event.keyCode);
   activeKeysPressed.splice(index, 1);
@@ -857,7 +858,7 @@ const determineMovement = () => {
 const camUpdate = () => {
 
   const calcIdealOffset = () => {
-    const idealOffset = thirdPerson ? new THREE.Vector3(0, camY, camZ) : new THREE.Vector3(0, 3, 6);
+    const idealOffset = thirdPerson ? new THREE.Vector3(0, camY, camZ) : new THREE.Vector3(0, 3, 7);
     idealOffset.applyQuaternion(character.quaternion);
     idealOffset.add(character.position);
     return idealOffset;
