@@ -62,6 +62,7 @@ activeTile,
 activeKeysPressed,
 bgMusic,
 muteBgMusic,
+infoModalDisplayed,
 loadingDismissed;
 
 const setScene = async () => {
@@ -96,8 +97,9 @@ const setScene = async () => {
 
   gltfLoader = new GLTFLoader();
   
-  activeKeysPressed = [];
-  muteBgMusic       = true;
+  activeKeysPressed   = [];
+  muteBgMusic         = true;
+  infoModalDisplayed  = false;
 
   joystick();
   setFog();
@@ -756,6 +758,8 @@ const toggleBirdsEyeView = () => {
 
 const keyDown = (event) => {
 
+  if(infoModalDisplayed) return;
+
   if(!activeKeysPressed.includes(event.keyCode)) 
     activeKeysPressed.push(event.keyCode);
     
@@ -900,7 +904,7 @@ const calcCharPos = () => {
 
   raycaster.set(character.position, new THREE.Vector3(0, -1, -0.1));
 
-  var intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
+  const intersects = raycaster.intersectObjects(terrainTiles.map(el => el.hex));
 
   if(activeTile !== intersects[0].object.name) createSurroundingTiles(intersects[0].object.name);
 
@@ -1016,6 +1020,8 @@ const pauseIconAnimation = (pause = true) => {
 }
 
 const toggleInfoModal = (display = true) => {
+
+  infoModalDisplayed = display;
 
   if(display) return gsap.timeline()
     .to('.info-modal-page', {
