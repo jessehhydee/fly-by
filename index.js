@@ -382,6 +382,7 @@ const setCharAnimation = () => {
 
     const randomTime      = Math.floor(Math.random() * (max - min + 1) + min);
     charAnimationTimeout  = setTimeout(interval, randomTime * 1000);
+    
   }
 
   interval();
