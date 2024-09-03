@@ -3,7 +3,7 @@
 
 Sit back, relax and enjoy flying through undulating terrain.
 
-This project started out as a procedual terrain generation experiment; A randomly generated 10 x 10 tile of hexagons with varying heights.
+This project started out as a procedural terrain generation experiment; A randomly generated 10 x 10 tile of hexagons with varying heights.
 
 One thing lead to another and <a href="https://hydeit.co/fly-by/" target="_blank">Fly By</a> became the finishing result.
 
